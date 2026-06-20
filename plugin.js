@@ -257,7 +257,11 @@
 
   _escapeHtml: function(text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    let escaped = text.replace(/[&<>"']/g, m => map[m]);
+    // Amplenote aggressively escapes markdown brackets inside tables. 
+    // We strip these stray backslashes before rendering them in the flashcard UI.
+    escaped = escaped.replace(/\\\[/g, '[').replace(/\\\]/g, ']');
+    return escaped;
   },
 
   _createScheduler: function() {
