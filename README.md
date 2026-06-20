@@ -58,6 +58,9 @@ Creating a flashcard is as simple as creating a table with **Question** and **An
 | What does DOM stand for? | Document Object Model |
 | How do you initialize a list in Python? | `my_list = []` |
 
+> [!WARNING] Amplenote Escaping Quirk
+> If your flashcard contains Markdown brackets like `[ ]` or `[[link]]`, **you must wrap them in backticks** like `` `[ ]` ``. If you don't use backticks, Amplenote's internal editor will try to aggressively escape them by inserting a backslash `\[` every time you run a review session.
+
 Add a tag to the note containing your flashcards (e.g., `#learning/javascript`).
 
 ### 2. Reviewing Flashcards
