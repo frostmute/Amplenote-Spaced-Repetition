@@ -11,8 +11,6 @@ tags:
 
 ### JavaScript Basics
 
-
-
 | | |
 |-|-|
 |Question|Answer|
