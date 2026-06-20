@@ -176,19 +176,43 @@
       // Update header row. We can name the header <!--SRS_DATA--> to hide the header itself!
       const headerCells = this._parseCells(lines[headerLineIdx]);
       headerCells.push('<!--SRS_DATA-->');
+      // Trim empty trailing cells so we don't inflate
+      while(headerCells.length > 2 && headerCells[headerCells.length - 2] === '') {
+          headerCells.splice(headerCells.length - 2, 1);
+          srsIdx--;
+      }
       lines[headerLineIdx] = '| ' + headerCells.join(' | ') + ' |';
 
       // Update separator row if present
       const sepIdx = headerLineIdx + 1;
       if (sepIdx < lines.length && /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())) {
         const sepCells = this._parseCells(lines[sepIdx]);
-        sepCells.push('---');
+        while(sepCells.length < headerCells.length) sepCells.push('---');
+        while(sepCells.length > headerCells.length) sepCells.pop();
         lines[sepIdx] = '| ' + sepCells.join(' | ') + ' |';
+      }
+      
+      // We must explicitly clean up the other rows in the table to match the column count, 
+      // or Amplenote's exporter goes crazy.
+      let r = (sepIdx < lines.length && /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())) ? sepIdx + 1 : headerLineIdx + 1;
+      while (r < lines.length && lines[r].trim().startsWith('|')) {
+        const rowCells = this._parseCells(lines[r]);
+        const rowLower = rowCells.map(c => c.toLowerCase().trim());
+        if (rowLower.some(h => h === 'question') && rowLower.some(h => h === 'answer')) break;
+        
+        while(rowCells.length > headerCells.length) rowCells.pop();
+        while(rowCells.length < headerCells.length) rowCells.push('');
+        lines[r] = '| ' + rowCells.join(' | ') + ' |';
+        r++;
       }
     }
 
     const cells = this._parseCells(lines[card.lineIndex]);
-    while (cells.length <= srsIdx) cells.push('');
+    
+    // Explicitly align the cell count to match headers to prevent column inflation
+    const headerCells = this._parseCells(lines[headerLineIdx]);
+    while (cells.length < headerCells.length) cells.push('');
+    while (cells.length > headerCells.length) cells.pop();
 
     const srsData = {
       interval: card.interval, easinessFactor: card.easinessFactor,
@@ -208,8 +232,21 @@
     cells[srsIdx] = `<!--${encodedSrs}-->`;
 
     // Fix the compounding backslash bug when Amplenote escapes the markdown.
-    // If the answer originally contained `[\]`, Amplenote gives us `[\\\]`.
-    // When we do `.join(' | ')`, it preserves those backslashes. Let's make sure we aren't duplicating them.
+    // Ensure we don't accidentally insert an empty column shift marker by placing empty strings
+    // Amplenote shifts columns when there are empty cells at the start `| | Question |`.
+    // When we join, if cells[0] is empty, it makes `|  | Question |` which creates an empty column!
+    // But `_parseCells` drops the outer pipes. If cells[0] was empty, `cells.join(' | ')` does it correctly.
+    // Wait, the test document has `| | | | | | \n |-|-|-|-|-| \n |Question|Answer|||| \n |What does DOM stand for?|Document Object Model||||`
+    // Oh! Amplenote's exporter is creating massive arrays of empty columns because we did `while (cells.length <= srsIdx) cells.push('');`
+    // And `srsIdx` got pushed out to 5 or 6 somehow! Let's prevent runaway column inflation.
+    
+    // Trim empty trailing cells beyond srsIdx
+    // Actually, we just enforced strict cell length matching above, so this block is no longer needed
+    // and might interfere if the SRS idx isn't the absolute last column for some reason.
+    // while (cells.length > srsIdx + 1 && cells[cells.length - 1] === '') {
+    //  cells.pop();
+    // }
+
     lines[card.lineIndex] = '| ' + cells.join(' | ') + ' |';
     return true;
   },
