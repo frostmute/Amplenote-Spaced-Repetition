@@ -654,9 +654,9 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe
 .bar-fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:2px;transition:width .4s ease}
 .card{background:#1a1d27;border:1px solid #2d3142;border-radius:16px;padding:28px 24px;min-height:220px;display:flex;align-items:center;justify-content:center;text-align:center;margin-bottom:24px;perspective:1000px;position:relative}
 .card-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.35em;font-weight:500;line-height:1.5;word-break:break-word;transition:transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);transform-style:preserve-3d;position:absolute;top:0;left:0}
-.card.flipped .card-inner{transform:rotateX(180deg)}
-.question, .answer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 24px;backface-visibility:hidden}
-.answer{transform:rotateX(180deg)}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.question, .answer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 24px;backface-visibility:hidden; -webkit-backface-visibility:hidden;}
+.answer{transform:rotateY(180deg)}
 .show-btn{width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;border:none;border-radius:10px;font-size:1em;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
 .show-btn:active{transform:scale(.98);opacity:.9}
 .ratings{display:none;grid-template-columns:repeat(4,1fr);gap:8px;animation: fadeIn 0.4s ease}
