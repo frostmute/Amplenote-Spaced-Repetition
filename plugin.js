@@ -80,13 +80,13 @@
             }
           }
 
-          let q = rowQIdx !== -1 && cells[rowQIdx] !== undefined ? cells[rowQIdx].trim() : '';
-          let a = rowAIdx !== -1 && cells[rowAIdx] !== undefined ? cells[rowAIdx].trim() : '';
+          let q = rowQIdx !== -1 && cells[rowQIdx] !== undefined ? cells[rowQIdx].replace(/<!--.*?-->/g, '').trim() : '';
+          let a = rowAIdx !== -1 && cells[rowAIdx] !== undefined ? cells[rowAIdx].replace(/<!--.*?-->/g, '').trim() : '';
 
           // Fallback to original unshifted indices if shift gave us nothing
           if (q === '' && a === '') {
-            q = qIdx !== -1 && cells[qIdx] !== undefined ? cells[qIdx].trim() : '';
-            a = aIdx !== -1 && cells[aIdx] !== undefined ? cells[aIdx].trim() : '';
+            q = qIdx !== -1 && cells[qIdx] !== undefined ? cells[qIdx].replace(/<!--.*?-->/g, '').trim() : '';
+            a = aIdx !== -1 && cells[aIdx] !== undefined ? cells[aIdx].replace(/<!--.*?-->/g, '').trim() : '';
             rowSrsIdx = srsIdx;
           }
 
