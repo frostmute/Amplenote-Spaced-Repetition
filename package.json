@@ -1,0 +1,14 @@
+{
+  "name": "amplenote-spaced-repetition",
+  "version": "1.0.0",
+  "description": "Zero-dependency FSRS-5 Spaced Repetition for Amplenote",
+  "main": "plugin.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Jonathan J. Wagner",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
