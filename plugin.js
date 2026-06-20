@@ -883,8 +883,8 @@ document.getElementById('mainWrap').focus();
     // Note: If you have \ in your markdown, it will get reduced to nothing on each save.
     // This is necessary because Amplenote's API currently doubles backslashes inside tables on every full-note overwrite.
     let newContent = this._linesToMarkdown(lines);
-    // Eliminate the compounding slashes on markdown brackets so they don't corrupt the note visually
-    newContent = newContent.replace(/\\\\\\\\/g, '').replace(/\\\\\\[/g, '[').replace(/\\\\\\]/g, ']');
+    // Eliminate all compounding slashes indiscriminately so they don't corrupt the note visually
+    newContent = newContent.replace(/\\/g, '');
     await note.replaceContent(newContent);
   }
 })
