@@ -1,4 +1,4 @@
-﻿---
+---
 title: Example Flashcard Note
 uuid: 4d9f02d6-6c4e-11f1-bada-d77c9acc6791
 version: 55
@@ -10,29 +10,8 @@ tags:
 ---
 
 
----
-
-title: Example Flashcard Note\
-uuid: 4d9f02d6-6c4e-11f1-bada-d77c9acc6791\
-version: 10\
-created: '2026-06-19T21:18:18-05:00'\
-updated: '2026-06-19T22:10:11-05:00'\
-tags:
-
-- flashcards
-
-- learning
-
-
----
-
-\
-
 ### JavaScript Basics
 
-\
-
-\
 
 | | |
 |-|-|
@@ -47,21 +26,9 @@ tags:
 |What does the `===` operator do?|Strict equality (checks value and type)|
 |What does `NaN` stand for?|Not-a-Number|
 |How do you check if a property exists on an object?|`hasOwnProperty()` or `in` operator|
-\
-
-\
-
-\
-
-\
 
 ### Python Fundamentals
 
-\
-
-\
-
-\
 
 | | |
 |-|-|
@@ -74,21 +41,10 @@ tags:
 |What is the default string encoding in Python 3?|UTF-8|
 |How do you get the length of a list in Python?|`len(my_list)`|
 |What does `__init__` do in a Python class?|It is the constructor method|
-\
 
-\
-
-\
-
-\
 
 ### CSS and Layout
 
-\
-
-\
-
-\
 
 | | |
 |-|-|
@@ -99,21 +55,11 @@ tags:
 |What is the default value of the `position` property?|`static`|
 |What unit is relative to the root element's font size?|`rem`|
 |How do you make a font italic in CSS?|`font-style: italic;`|
-\
 
-\
-
-\
-
-\
 
 ### Amplenote Specific
 
-\
 
-\
-
-\
 
 | | |
 |-|-|
