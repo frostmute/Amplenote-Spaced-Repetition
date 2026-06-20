@@ -28,6 +28,35 @@ A completely standalone implementation of the state-of-the-art **[FSRS-5 (Free S
 
 <br>
 
+## 🧠 What is FSRS & How Does it Work?
+
+If you are new to Spaced Repetition, here is a quick crash course on how this plugin actually makes you learn faster.
+
+### The Forgetting Curve
+When you learn a new fact, your brain naturally starts forgetting it almost immediately. This is known as the "Forgetting Curve". To commit something to long-term memory, you shouldn't review it every single day. Instead, you should review it *just before you are about to forget it*. 
+
+Every time you successfully recall a fact at the edge of forgetting, your memory of it grows stronger, and the time it takes to forget it again gets longer.
+
+### FSRS-5 (Free Spaced Repetition Scheduler)
+FSRS is a state-of-the-art mathematical algorithm that predicts your exact forgetting curve. When you review a flashcard in this plugin, you are asked to grade your memory on a scale of 1 to 4:
+1. **🔴 Again (Forgot):** You completely forgot the answer. The plugin resets the card's interval to 0 days, forcing you to relearn it immediately.
+2. **🟠 Hard:** You remembered it, but it took severe mental effort. The algorithm slightly increases the interval (e.g., from 3 days to 4 days) but flags the card as "difficult" to remember.
+3. **🟢 Good:** You remembered it with normal effort. The algorithm significantly increases the interval (e.g., from 3 days to 8 days).
+4. **🟣 Easy:** The answer was instantly obvious. The algorithm rapidly pushes the next review date far into the future (e.g., from 3 days to 14 days) so you don't waste time studying things you already know.
+
+### Under the Hood
+To calculate exactly how many days to wait before showing you a card again, the plugin's FSRS algorithm tracks three hidden variables for every single flashcard you create:
+* **Stability ($S$):** How well you retain the memory. High stability means it takes months to forget.
+* **Difficulty ($D$):** How inherently hard the concept is for your brain to grasp. 
+* **Retrievability ($R$):** The probability (from 0% to 100%) that you can recall the card *right now*.
+
+By measuring how long it takes you to answer a card (the **timer** running in the background while the flashcard UI is open) and combining it with your 1-4 rating, the FSRS math calculates your unique $S$, $D$, and $R$ for that specific fact, outputting the optimal `nextReview` date.
+
+### Why is there a Daily Limit?
+Spaced repetition is a marathon, not a sprint. If you have 500 flashcards due for review, trying to cram them all in one day leads to severe mental fatigue and artificially lowers your retention rates. The plugin allows you to set a `Daily Review Limit` (in Amplenote's plugin settings) to arbitrarily cap your daily sessions to a manageable chunk (e.g., 50 cards a day), ensuring your studying remains a healthy daily habit rather than an exhausting chore.
+
+<br>
+
 ## 🚀 Installation
 
 ### Manual Install
