@@ -1,4 +1,4 @@
-﻿---
+---
 title: Example Flashcard Note
 uuid: 4d9f02d6-6c4e-11f1-bada-d77c9acc6791
 version: 10
