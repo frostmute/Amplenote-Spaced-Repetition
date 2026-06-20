@@ -822,7 +822,6 @@ document.getElementById('mainWrap').focus();
         `| 🟠 Hard | ${stats.hard} | ${hardPct}% |`,
         `| 🟢 Good | ${stats.good} | ${goodPct}% |`,
         `| 🟣 Easy | ${stats.easy} | ${easyPct}% |`,
-        "",
         `<!--STATS:${JSON.stringify(stats)}-->`
       ];
       await dashboardNote.replaceContent(dbLines.join('\n'));
