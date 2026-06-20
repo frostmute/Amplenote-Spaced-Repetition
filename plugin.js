@@ -400,6 +400,16 @@
   _runReviewSession: async function(app, dueCards) {
     this._currentReviewSession = { cards: dueCards, index: 0, ratingsCount: {1:0, 2:0, 3:0, 4:0} };
     
+    // Check context for mobile flag. If mobile, skip embed and go straight to prompt.
+    const context = (app.context && typeof app.context === 'object') ? app.context : (await app.getContext ? await app.getContext() : null);
+    const isMobile = context ? (context.environment === 'mobile' || context.isMobile) : false;
+
+    if (isMobile) {
+      console.log("Mobile client detected, using free-tier prompt mode directly.");
+      await this._runFreeTierPromptSession(app, dueCards);
+      return;
+    }
+
     // Try to open the paid-tier embed first
     try {
       // Pass card object directly — Amplenote handles serialization internally.
