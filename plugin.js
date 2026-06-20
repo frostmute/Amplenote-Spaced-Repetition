@@ -761,21 +761,22 @@ document.getElementById('mainWrap').focus();
       stats.good += session.ratingsCount[3] || 0;
       stats.easy += session.ratingsCount[4] || 0;
 
-      const newContent = `# Spaced Repetition Dashboard
-This note is automatically updated by the Spaced Repetition plugin.
-
-## Lifetime Statistics
-| Metric | Count |
-| --- | --- |
-| **Total Reviews** | **${stats.totalReviews}** |
-| Again (Forgot) | ${stats.again} |
-| Hard | ${stats.hard} |
-| Good | ${stats.good} |
-| Easy | ${stats.easy} |
-
-<!--STATS:${JSON.stringify(stats)}-->
-`;
-      await dashboardNote.replaceContent(newContent);
+      const dbLines = [
+        "# Spaced Repetition Dashboard",
+        "This note is automatically updated by the Spaced Repetition plugin.",
+        "",
+        "## Lifetime Statistics",
+        "| Metric | Count |",
+        "| --- | --- |",
+        `| **Total Reviews** | **${stats.totalReviews}** |`,
+        `| Again (Forgot) | ${stats.again} |`,
+        `| Hard | ${stats.hard} |`,
+        `| Good | ${stats.good} |`,
+        `| Easy | ${stats.easy} |`,
+        "",
+        `<!--STATS:${JSON.stringify(stats)}-->`
+      ];
+      await app.insertNoteContent({ uuid: dashboardNote.uuid }, dbLines.join('\n'));
     } catch (e) {
       console.error("Failed to update dashboard", e);
     }
