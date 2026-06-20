@@ -880,13 +880,11 @@ document.getElementById('mainWrap').focus();
     // Since we don't have the section, we can use `note.replaceContent(newContent)` but we must unescape the compounding slashes before sending it back!
     
     // Unescape compounding backslashes that Amplenote generates on every read/write cycle
-    // Note: If you have \\ in your markdown, it will get reduced to \ on each save.
+    // Note: If you have \ in your markdown, it will get reduced to nothing on each save.
     // This is necessary because Amplenote's API currently doubles backslashes inside tables on every full-note overwrite.
     let newContent = this._linesToMarkdown(lines);
-    // Reduce exponentially compounded backslashes down to a single escape
-    while (newContent.includes('\\\\\\\\')) {
-      newContent = newContent.replace(/\\\\\\\\/g, '\\\\');
-    }
+    // Eliminate the compounding slashes on markdown brackets so they don't corrupt the note visually
+    newContent = newContent.replace(/\\\\\\\\/g, '').replace(/\\\\\\[/g, '[').replace(/\\\\\\]/g, ']');
     await note.replaceContent(newContent);
   }
 })
