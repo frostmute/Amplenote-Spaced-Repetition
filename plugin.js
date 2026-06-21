@@ -778,7 +778,7 @@ document.getElementById('mainWrap').focus();
           _complete: true, 
           stats: this._currentReviewSession.ratingsCount, 
           total: this._currentReviewSession.cards.length,
-          avgEf: this._currentReviewSession.cards.reduce((a,c)=>a+(c.easinessFactor||0),0)/(this._currentReviewSession.cards.length||1)
+          avgEf: this._currentReviewSession.cards.reduce((a,c)=>a+(c.stability||c.easinessFactor||0),0)/(this._currentReviewSession.cards.length||1)
         });
         await app.context.renderEmbed();
       }
