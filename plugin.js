@@ -790,6 +790,7 @@ document.getElementById('mainWrap').focus();
   _updateDashboard: async function(app, session) {
     try {
       let dashboardNote = null;
+      // Amplenote filterNotes tags must match exactly without the #
       const notes = await app.filterNotes({ tag: "srs-dashboard" });
       if (notes && notes.length > 0) {
         dashboardNote = await app.notes.find(notes[0].uuid);
@@ -798,7 +799,8 @@ document.getElementById('mainWrap').focus();
         dashboardNote = await app.notes.find(newNoteUUID);
       }
 
-      let content = await dashboardNote.content() || "";
+      const freshNote = await app.notes.find(dashboardNote.uuid);
+      let content = await freshNote.content() || "";
       let stats = { totalReviews: 0, again: 0, hard: 0, good: 0, easy: 0 };
       
       const statsMatch = content.match(/<!--STATS:(.*?)-->/);
@@ -818,24 +820,23 @@ document.getElementById('mainWrap').focus();
       const easyPct = stats.totalReviews > 0 ? Math.round((stats.easy / stats.totalReviews) * 100) : 0;
       const retention = stats.totalReviews > 0 ? Math.round(((stats.hard + stats.good + stats.easy) / stats.totalReviews) * 100) : 0;
 
-      const dbLines = [
-        "## 🧠 Spaced Repetition Dashboard",
-        "> This note is automatically updated by the Spaced Repetition plugin after every review session.",
-        "",
-        `**Lifetime Retention Rate:** ${retention}% `,
-        "___",
-        "### Lifetime Statistics",
-        "| Metric | Count | Distribution |",
-        "| --- | --- | --- |",
-        `| **Total Reviews** | **${stats.totalReviews}** | 100% |`,
-        `| 🔴 Again (Forgot) | ${stats.again} | ${againPct}% |`,
-        `| 🟠 Hard | ${stats.hard} | ${hardPct}% |`,
-        `| 🟢 Good | ${stats.good} | ${goodPct}% |`,
-        `| 🟣 Easy | ${stats.easy} | ${easyPct}% |`,
-        "",
-        `<!--STATS:${JSON.stringify(stats)}-->`
-      ];
-      await dashboardNote.replaceContent(dbLines.join('\n'));
+      const newContent = `# Spaced Repetition Dashboard
+> This note is automatically updated by the Spaced Repetition plugin after every review session.
+
+**Lifetime Retention Rate:** ${retention}% 
+___
+### Lifetime Statistics
+| Metric | Count | Distribution |
+| --- | --- | --- |
+| **Total Reviews** | **${stats.totalReviews}** | 100% |
+| 🔴 Again (Forgot) | ${stats.again} | ${againPct}% |
+| 🟠 Hard | ${stats.hard} | ${hardPct}% |
+| 🟢 Good | ${stats.good} | ${goodPct}% |
+| 🟣 Easy | ${stats.easy} | ${easyPct}% |
+
+<!--STATS:${JSON.stringify(stats)}-->
+`;
+      await app.replaceNoteContent({ uuid: dashboardNote.uuid }, newContent);
     } catch (e) {
       console.error("Failed to update dashboard", e);
     }
