@@ -1,5 +1,6 @@
 const fs = require('fs');
-const pluginContent = fs.readFileSync('plugin.js', 'utf8');
+const path = require('path');
+const pluginContent = fs.readFileSync(path.join(__dirname, '../plugin.js'), 'utf8');
 const plugin = eval(pluginContent);
 
 describe('Markdown Parser', () => {
