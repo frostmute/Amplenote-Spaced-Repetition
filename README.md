@@ -124,6 +124,36 @@ npm test
 
 <br>
 
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+### Reporting Bugs
+If you find a bug or something isn't working right:
+1. Check the [Issues](https://github.com/frostmute/Amplenote-Spaced-Repetition/issues) tab to see if it has already been reported.
+2. If not, open a new Issue. Please include:
+   - Your device and OS (Mac, Windows, iOS, Android).
+   - Whether you are using the free tier or paid tier (Peek Viewer).
+   - The exact error message or a description of the unexpected behavior.
+   - A copy of the Markdown table that caused the issue (if applicable).
+
+### Requesting Features
+Have an idea to make the plugin better?
+1. Open an Issue and tag it with `enhancement`.
+2. Describe the feature, why it would be useful, and how you imagine it working within Amplenote's constraints.
+
+### Submitting Pull Requests
+If you want to contribute code:
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix (`git checkout -b feature/amazing-feature`).
+3. Make your changes to `plugin.js`. **Do not add external dependencies.** This plugin must remain a single vanilla JS file to stay under Amplenote's ~260KB limit.
+4. Run the test suite to ensure the custom markdown parser hasn't broken: `npm test`
+5. Commit your changes using Conventional Commits (`git commit -m "feat: added amazing feature"`).
+6. Push to your branch (`git push origin feature/amazing-feature`).
+7. Open a Pull Request!
+
+<br>
+
 <div align="center">
   <i>Built for the Nexus Vault</i><br>
   <b>DeepspaceGhost / Jonathan J. Wagner</b>
