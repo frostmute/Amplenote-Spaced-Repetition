@@ -405,7 +405,7 @@
     const isMobile = context ? (context.environment === 'mobile' || context.isMobile) : false;
 
     if (isMobile) {
-      console.log("Mobile client detected, using free-tier prompt mode directly.");
+      // console.log("Mobile client detected, using free-tier prompt mode directly.");
       await this._runFreeTierPromptSession(app, dueCards);
       return;
     }
