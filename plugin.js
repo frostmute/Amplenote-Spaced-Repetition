@@ -795,12 +795,16 @@ document.getElementById('mainWrap').focus();
       if (notes && notes.length > 0) {
         dashboardNote = await app.notes.find(notes[0].uuid);
       } else {
-        const newNoteUUID = await app.notes.create("Spaced Repetition Dashboard", ["srs-dashboard"]);
+        const newNoteUUID = await app.createNote("Spaced Repetition Dashboard", ["srs-dashboard"]);
         dashboardNote = await app.notes.find(newNoteUUID);
       }
 
-      const freshNote = await app.notes.find(dashboardNote.uuid);
-      let content = await freshNote.content() || "";
+      if (!dashboardNote) {
+        console.error("Dashboard note could not be found or created.");
+        return;
+      }
+
+      let content = await dashboardNote.content() || "";
       let stats = { totalReviews: 0, again: 0, hard: 0, good: 0, easy: 0 };
       
       const statsMatch = content.match(/<!--STATS:(.*?)-->/);
@@ -808,6 +812,7 @@ document.getElementById('mainWrap').focus();
         try { stats = JSON.parse(statsMatch[1]); } catch(e) {}
       }
 
+      // Merge the new session stats directly
       stats.totalReviews += session.cards.length;
       stats.again += session.ratingsCount[1] || 0;
       stats.hard += session.ratingsCount[2] || 0;
@@ -820,7 +825,7 @@ document.getElementById('mainWrap').focus();
       const easyPct = stats.totalReviews > 0 ? Math.round((stats.easy / stats.totalReviews) * 100) : 0;
       const retention = stats.totalReviews > 0 ? Math.round(((stats.hard + stats.good + stats.easy) / stats.totalReviews) * 100) : 0;
 
-      const newContent = `# Spaced Repetition Dashboard
+      const newContent = `# 🧠 Spaced Repetition Dashboard
 > This note is automatically updated by the Spaced Repetition plugin after every review session.
 
 **Lifetime Retention Rate:** ${retention}% 
@@ -834,8 +839,9 @@ ___
 | 🟢 Good | ${stats.good} | ${goodPct}% |
 | 🟣 Easy | ${stats.easy} | ${easyPct}% |
 
-<!--STATS:${JSON.stringify(stats)}-->
-`;
+<!--STATS:${JSON.stringify(stats)}-->`;
+      
+      // Use app.replaceNoteContent explicitly with UUID object
       await app.replaceNoteContent({ uuid: dashboardNote.uuid }, newContent);
     } catch (e) {
       console.error("Failed to update dashboard", e);
