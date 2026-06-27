@@ -26,9 +26,9 @@ This document is the **accuracy gate** for the usage documentation pipeline. It 
 
 If the accuracy gate check above determines we need to continue, reset all tasks in the following documents:
 
-- [x] **Reset 1_ANALYZE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/1_ANALYZE.md`
-- [x] **Reset 2_FIND_GAPS.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/2_FIND_GAPS.md`
-- [x] **Reset 3_EVALUATE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/3_EVALUATE.md`
+- [x] **Reset 1_ANALYZE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/1_ANALYZE.md` 
+- [x] **Reset 2_FIND_GAPS.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/2_FIND_GAPS.md` 
+- [x] **Reset 3_EVALUATE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/3_EVALUATE.md` 
 - [x] **Reset 4_IMPLEMENT.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/4_IMPLEMENT.md`
 
 **IMPORTANT**: Only reset documents 1-4 if there are PENDING items with CRITICAL/HIGH importance and EASY/MEDIUM effort. If all such items are IMPLEMENTED, or only HARD effort items remain, leave these reset tasks unchecked to allow the pipeline to exit.
@@ -94,7 +94,7 @@ Track progress across loops:
 | Loop | Gaps Fixed | Gaps Remaining | Decision |
 |------|------------|----------------|----------|
 | 1 | 1 | 1 | CONTINUE |
-| 2 | ___ | ___ | [CONTINUE / EXIT] |
+| 2 | 1 | 0 | EXIT |
 | ... | ... | ... | ... |
 
 ## Manual Override
