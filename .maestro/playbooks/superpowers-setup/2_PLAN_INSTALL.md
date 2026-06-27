@@ -37,14 +37,14 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
 
 - [x] **Verify the harness CLI is on `PATH`** for the detected provider, where applicable:
 
-  | Provider | Command to probe |
-  |---|---|
-  | `claude-code` | `which claude` |
-  | `codex` | `which codex` |
-  | `opencode` | `which opencode` |
-  | `factory-droid` | `which droid` |
-  | `copilot-cli` | `which copilot` |
-  | `gemini-cli` | `which gemini` |
+  | Provider        | Command to probe |
+  | --------------- | ---------------- |
+  | `claude-code`   | `which claude`   |
+  | `codex`         | `which codex`    |
+  | `opencode`      | `which opencode` |
+  | `factory-droid` | `which droid`    |
+  | `copilot-cli`   | `which copilot`  |
+  | `gemini-cli`    | `which gemini`   |
 
   Record found / not-found. A missing harness CLI is not always blocking (e.g. Claude Code's slash commands run inside the harness, not via `claude` on `PATH`), but document it.
 
@@ -75,14 +75,17 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
   - **Date**: 2026-06-27
 
   ## Prerequisites
+
   - `git`: <version | MISSING>
   - Harness CLI (`<binary>`): <path | not-on-PATH | n/a>
   - Provider-specific: <one-line note, e.g. "OpenCode config: ~/.config/opencode/opencode.json (exists)" | "OpenCode config: none found, will create global">
 
   ## Strategy
+
   <one paragraph: what document 3 will do, in plain language>
 
   ## Automatable Steps
+
   <Numbered list. Each step has: a one-line description, the exact command or file edit, and the expected outcome. Empty list is fine if the provider is fully user-required.>
 
   1. <step>
@@ -90,6 +93,7 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
      - Expects: <success signal — exit 0, file content matches, etc.>
 
   ## User-Required Steps
+
   <Numbered list of steps the user must perform interactively in the harness, with verbatim commands to paste. Empty list is fine if the provider is fully automatable.>
 
   1. <step>
@@ -97,6 +101,7 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
      - Expects: <success signal>
 
   ## Skip / Block
+
   <Use this section only if Supported is "no" or a prerequisite is missing. State the blocker plainly. Document 3 will see this and exit without changes.>
   ```
 

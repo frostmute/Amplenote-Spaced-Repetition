@@ -19,7 +19,6 @@ The agent running this playbook **is** the harness we are setting up. Detection 
 ### Task 1: Self-identify
 
 - [x] **State your harness**: You are running inside an AI coding harness right now. Without checking files, name the harness you are running inside (Claude Code, Codex, OpenCode, Factory Droid, GitHub Copilot CLI, Gemini CLI, Qwen3 Coder, or other). If you are uncertain, say so explicitly — do not guess. Also map your answer to the canonical Maestro `toolType` value (`claude-code`, `codex`, `opencode`, `factory-droid`, `copilot-cli`, `gemini-cli`, or `qwen3-coder`).
-  - *I self-identify as OpenCode (`opencode`).*
 
 ### Task 2: Cross-check via binary on PATH
 
@@ -36,12 +35,10 @@ The agent running this playbook **is** the harness we are setting up. Detection 
   ```
 
   A binary on `PATH` is corroborating evidence but not proof of which harness is currently driving this session — multiple harnesses may be installed on the same machine. Some harnesses (notably some Claude Code distributions) do not require their CLI on `PATH` at all, so a not-found result for the self-identified harness is not necessarily wrong.
-  - *Probe complete. Found binaries for claude, codex, opencode, droid, copilot, and gemini. qwen not found.*
 
 ### Task 3: Reconcile and write `PROVIDER.md`
 
 - [x] **Pick one provider with confidence**: Reconcile self-identification against the PATH probe. The self-identification is authoritative — you know what you are. The PATH probe is a sanity check that should not contradict it; if it does (e.g. you self-identified as Claude Code but found `codex` on `PATH` and not `claude`), state the discrepancy in the notes and degrade confidence to `medium`.
-  - *Provider identified as `opencode` with high confidence.*
 
 - [x] **Write `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/PROVIDER.md`** with this exact structure:
 
@@ -55,9 +52,11 @@ The agent running this playbook **is** the harness we are setting up. Detection 
   ## Signals
 
   ### Self-identification
+
   <one-line description of what the agent identifies as, including the canonical toolType mapping>
 
   ### PATH probe
+
   - `claude`: `<path or not-found>`
   - `codex`: `<path or not-found>`
   - `opencode`: `<path or not-found>`
@@ -67,9 +66,11 @@ The agent running this playbook **is** the harness we are setting up. Detection 
   - `qwen`: `<path or not-found>`
 
   ## Reconciliation Notes
+
   <1-3 sentences. If self-identification and PATH probe disagreed, explain. If confidence is medium or low, say what would raise it.>
 
   ## Supported by Superpowers?
+
   <yes | no | partial>
 
   - `claude-code`, `codex`, `opencode`, `factory-droid`, `copilot-cli`, `gemini-cli` → yes
@@ -101,10 +102,8 @@ If the detected provider has no upstream Superpowers install path (currently: `q
   - The canonical provider value is `unknown` (detection is inconclusive — self-identification was uncertain and the PATH probe could not confirm any single harness).
 
   Otherwise — provider is one of `claude-code`, `codex`, `opencode`, `factory-droid`, `copilot-cli`, `gemini-cli` — **do not halt**. Skip the rest of this task and let document 2 read the recipe.
-  - *Decided not to halt as the provider is `opencode`.*
 
 - [x] **Write `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/SUPERPOWERS_SETUP.md` now** (since documents 2-5 will not run):
-  - *Skipped as we are not halting.*
 
   ```markdown
   # Superpowers Setup — Summary
@@ -124,10 +123,10 @@ If the detected provider has no upstream Superpowers install path (currently: `q
 
   <Pick the one that matches:
 
-   - "Provider is Qwen3 Coder. Superpowers' upstream repo does not document an install path for this harness as of the date this playbook was authored. Check <https://github.com/obra/superpowers> for community-contributed paths."
+  - "Provider is Qwen3 Coder. Superpowers' upstream repo does not document an install path for this harness as of the date this playbook was authored. Check <https://github.com/obra/superpowers> for community-contributed paths."
 
-   - "Provider could not be confidently identified. Self-identification was uncertain and the PATH probe did not confirm any single harness. Re-run this playbook in an agent whose harness is clearly one of: Claude Code, Codex, OpenCode, Factory Droid, GitHub Copilot CLI, Gemini CLI."
-  >
+  - "Provider could not be confidently identified. Self-identification was uncertain and the PATH probe did not confirm any single harness. Re-run this playbook in an agent whose harness is clearly one of: Claude Code, Codex, OpenCode, Factory Droid, GitHub Copilot CLI, Gemini CLI."
+    >
 
   ## Re-running this playbook
 
@@ -140,7 +139,6 @@ If the detected provider has no upstream Superpowers install path (currently: `q
   ```
 
 - [x] **Append the halt marker to the bottom of `1_DETECT_PROVIDER.md`** using `Edit`:
-  - *Skipped as we are not halting.*
 
   ```text
   <!-- maestro:halt: provider is <qwen3-coder|unknown>; no upstream Superpowers install path -->

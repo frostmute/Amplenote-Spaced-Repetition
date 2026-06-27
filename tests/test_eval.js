@@ -1,6 +1,6 @@
 const html = `<body>
   <script>
-    const data = ${JSON.stringify("[something]")};
+    const data = ${JSON.stringify('[something]')};
     console.log(data);
   </script>
 </body>`;

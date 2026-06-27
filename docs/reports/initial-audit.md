@@ -6,7 +6,7 @@ tags:
   - audit
   - baseline
 related:
-  - "[[Phase-01-Audit-and-Foundation]]"
+  - '[[Phase-01-Audit-and-Foundation]]'
 ---
 
 # Initial Audit and Foundation Health Report

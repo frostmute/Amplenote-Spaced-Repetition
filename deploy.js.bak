@@ -1,0 +1,99 @@
+const fs = require('fs');
+const { spawn } = require('child_process');
+
+const pluginCode = fs.readFileSync('/Users/thewytchhaus/Documents/GitHub/amplenote-spaced-repetition/plugin.js', 'utf8');
+const NOTE_NAME = "Spaced Repetition"; // The name of your plugin note
+
+// Create the JSON-RPC payload
+const payload = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/call",
+    params: {
+        name: "amplenote_searchNotes",
+        arguments: {
+            query: NOTE_NAME
+        }
+    }
+};
+
+const proxy = spawn('npx', [
+    'mcp-remote',
+    'http://127.0.0.1:39377/mcp',
+    '--header',
+    'Authorization: Bearer d9a648...139'
+]);
+
+let noteUUID = null;
+let currentContent = "";
+
+proxy.stdout.on('data', (data) => {
+    const text = data.toString();
+    if (text.includes('"jsonrpc"')) {
+        // Find the valid JSON line
+        const lines = text.split('\\n');
+        for (const line of lines) {
+            if (line.startsWith('{')) {
+                try {
+                    const response = JSON.parse(line);
+                    if (response.id === 1 && response.result) {
+                        const content = response.result.content[0].text;
+                        const match = content.match(/UUID:\\s*([0-9a-fA-F-]+)/);
+                        if (match) {
+                            noteUUID = match[1];
+                            console.log("Found Plugin Note UUID:", noteUUID);
+                            
+                            // Now fetch content
+                            const fetchPayload = {
+                                jsonrpc: "2.0",
+                                id: 2,
+                                method: "tools/call",
+                                params: {
+                                    name: "amplenote_getNoteContent",
+                                    arguments: { noteUUID: noteUUID }
+                                }
+                            };
+                            proxy.stdin.write(JSON.stringify(fetchPayload) + '\\n');
+                        }
+                    } else if (response.id === 2 && response.result) {
+                        currentContent = response.result.content[0].text;
+                        console.log("Fetched Note Content length:", currentContent.length);
+                        
+                        // Replace the code block
+                        const newContent = currentContent.replace(
+                            /```javascript\\n([\\s\\S]*?)```/,
+                            `\`\`\`javascript\\n${pluginCode}\\n\`\`\``
+                        );
+                        
+                        const updatePayload = {
+                            jsonrpc: "2.0",
+                            id: 3,
+                            method: "tools/call",
+                            params: {
+                                name: "amplenote_replaceNoteContent",
+                                arguments: {
+                                    noteUUID: noteUUID,
+                                    markdownContent: newContent
+                                }
+                            }
+                        };
+                        proxy.stdin.write(JSON.stringify(updatePayload) + '\\n');
+                    } else if (response.id === 3) {
+                        console.log("Plugin note updated successfully!");
+                        proxy.kill();
+                    }
+                } catch (e) {
+                    // Ignore non-json stdout noise from mcp-remote
+                }
+            }
+        }
+    }
+});
+
+proxy.stderr.on('data', (data) => {
+    // console.error(data.toString());
+});
+
+setTimeout(() => {
+    proxy.stdin.write(JSON.stringify(payload) + '\\n');
+}, 2000); // Give proxy time to connect

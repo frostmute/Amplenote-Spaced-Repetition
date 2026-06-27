@@ -25,10 +25,13 @@ const replacement = `const againPct = stats.totalReviews > 0 ? Math.round((stats
         \`<!--STATS:\${JSON.stringify(stats)}-->\`
       ];`;
 
-if(code.includes('const dbLines = [')){
-    const newCode = code.replace(/const dbLines = \[\s*"# Spaced Repetition Dashboard",[\s\S]*?`<!--STATS:\$\{JSON\.stringify\(stats\)\}-->`\s*\];/, replacement);
-    fs.writeFileSync('plugin.js', newCode);
-    console.log("Replaced dashboard formatting");
+if (code.includes('const dbLines = [')) {
+  const newCode = code.replace(
+    /const dbLines = \[\s*"# Spaced Repetition Dashboard",[\s\S]*?`<!--STATS:\$\{JSON\.stringify\(stats\)\}-->`\s*\];/,
+    replacement
+  );
+  fs.writeFileSync('plugin.js', newCode);
+  console.log('Replaced dashboard formatting');
 } else {
-    console.log("Failed to find dbLines");
+  console.log('Failed to find dbLines');
 }

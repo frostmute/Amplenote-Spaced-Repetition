@@ -7,9 +7,11 @@
 ## Signals
 
 ### Self-identification
-The agent running this session is OpenCode, which maps to the Maestro toolType `opencode`.
+
+I am running inside the OpenCode harness. My canonical Maestro toolType is `opencode`.
 
 ### PATH probe
+
 - `claude`: `/Users/thewytchhaus/.local/bin/claude`
 - `codex`: `/usr/local/bin/codex`
 - `opencode`: `/Users/thewytchhaus/.opencode/bin/opencode`
@@ -19,7 +21,9 @@ The agent running this session is OpenCode, which maps to the Maestro toolType `
 - `qwen`: `not-found`
 
 ## Reconciliation Notes
-I confidently self-identified as OpenCode (`opencode`). The PATH probe confirmed that the `opencode` binary is present at `/Users/thewytchhaus/.opencode/bin/opencode`. Although other AI harnesses are also installed on this machine, my self-identification is authoritative.
+
+I am explicitly configured and running as an `opencode` agent according to my Maestro system context. The PATH probe confirmed that the `opencode` CLI is installed, corroborating my self-identification. While multiple harness CLIs exist on PATH, my system context provides absolute certainty.
 
 ## Supported by Superpowers?
+
 yes

@@ -570,19 +570,6 @@
         const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
         return isNaN(nextReview.getTime()) ? true : nextReview <= now;
       });
-              allFlashcards = allFlashcards.concat(flashcards);
-            }
-          }
-        } catch (noteError) {
-          console.error(noteError);
-        }
-      }
-
-      const now = new Date();
-      let dueCards = allFlashcards.filter((card) => {
-        const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
-        return isNaN(nextReview.getTime()) ? true : nextReview <= now;
-      });
 
       if (dueCards.length === 0) {
         await app.alert('No flashcards are due for review!');
@@ -1223,8 +1210,8 @@ ___
       last_review: card.last_review,
     };
     const encodedSrs = btoa(JSON.stringify(srsData));
-    let newContent = '';
 
+    let newContent;
     if (freshCard.format === 'quote') {
       const srsMarker = `<!--${encodedSrs}-->`;
       if (freshCard.srsLineIdx !== -1) {

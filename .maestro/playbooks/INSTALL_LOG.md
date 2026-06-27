@@ -1,0 +1,1 @@
+# Install Log\n\n- **Provider**: opencode\n- **Date**: 2026-06-27\n\n## Automatable Steps Executed\n1. Add superpowers repository to `~/.config/opencode/opencode.json` (Automated File Edit) - OK (Already present)\n\n## User-Required Steps Staged\nSee USER_ACTIONS.md\n\n## Files Modified\n(none - opencode.json was already configured)\n\n## Outcome\nAWAITING_USER
