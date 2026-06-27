@@ -20,7 +20,7 @@ Survey the codebase to discover user-facing features and read the current README
 
 ## Analysis Checklist
 
-- [ ] **Discover features and scan README (if needed)**: Read the project's README.md to extract what features are currently documented. Surveyed the codebase (`plugin.js`) to identify actual user-facing features (like appOptions, settings). Output a feature inventory to `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_FEATURE_INVENTORY.md` identifying two undocumented plugin settings: "Default Tags" and "Review Order".
+- [x] **Discover features and scan README (if needed)**: Read the project's README.md to extract what features are currently documented. Surveyed the codebase (`plugin.js`) to identify actual user-facing features (like appOptions, settings). Output a feature inventory to `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_FEATURE_INVENTORY.md` identifying one undocumented plugin setting: "Review Order" (Default Tags was actually documented).
 
 ## What to Look For in the Codebase
 
