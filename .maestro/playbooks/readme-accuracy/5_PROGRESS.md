@@ -112,14 +112,7 @@ Track progress across loops:
 
 Items that still need attention after this loop:
 
-### Needs Maintainer Review
-- [ ] DOC-XXX: [feature] - [why needs review]
-
-### Intentionally Undocumented
-- [ ] DOC-XXX: [feature] - [reason]
-
-### Low Priority (future)
-- [ ] DOC-XXX: [feature] - [can address later]
+### Needs Maintainer Review\nNone\n\n### Intentionally Undocumented\nNone\n\n### Low Priority (future)\nNone
 
 ## Notes
 
