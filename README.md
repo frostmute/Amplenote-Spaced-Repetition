@@ -1,4 +1,8 @@
 <div align="center">
+  <img src="https://github.com/frostmute/Amplenote-Spaced-Repetition/blob/master/amplenote-srs.png" alt="Amplenote SRS Banner" width="600" />
+</div>
+
+<div align="center">
 
 # 🧠 Amplenote Spaced Repetition
 
