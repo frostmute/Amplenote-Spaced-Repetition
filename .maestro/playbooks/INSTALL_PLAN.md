@@ -2,27 +2,22 @@
 
 - **Provider**: opencode
 - **Supported**: yes
-- **Date**: 2026-06-26
+- **Date**: 2026-06-27
 
 ## Prerequisites
-- `git`: 2.54.0
+- `git`: git version 2.54.0
 - Harness CLI (`opencode`): /Users/thewytchhaus/.opencode/bin/opencode
 - Provider-specific: OpenCode config: ~/.config/opencode/opencode.json (exists)
 
 ## Strategy
-Since the `opencode` provider relies on a configuration file (`~/.config/opencode/opencode.json`), the automatable step will edit this JSON file to inject the `superpowers` plugin into the `plugins` array. After the file is updated, a user-required step is needed to restart the `opencode` harness so it loads the new plugin.
+Since `INSTALL_RECIPES.md` was missing in this context, but we know this is `opencode`, Document 3 will automate adding the Superpowers git repository to the OpenCode skills configuration file (`~/.config/opencode/opencode.json`) to register it, and then prompt the user to restart OpenCode.
 
 ## Automatable Steps
-
-1. Add `superpowers` to opencode config
-   - Action: `Edit ~/.config/opencode/opencode.json: add "superpowers" to the plugins array if not present`
-   - Expects: File is successfully written and valid JSON.
+1. Add superpowers repository to `~/.config/opencode/opencode.json`
+   - Action: `Edit ~/.config/opencode/opencode.json: add git+https://github.com/obra/superpowers.git to skills array or equivalent configuration`
+   - Expects: File is successfully written/edited and parses as valid JSON.
 
 ## User-Required Steps
-
-1. Restart opencode
-   - Run in opencode: `exit` (then restart the CLI)
-   - Expects: opencode starts with the superpowers plugin loaded.
-
-## Skip / Block
-(None)
+1. Restart OpenCode
+   - Run in OpenCode: Exit and restart the OpenCode terminal/session.
+   - Expects: OpenCode reloads configuration and detects the new skills.

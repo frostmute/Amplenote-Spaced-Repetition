@@ -5,7 +5,7 @@
 - **Playbook**: Superpowers Setup
 - **Agent**: Amplenote SRS
 - **Project**: /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition
-- **Date**: 2026-06-26
+- **Date**: 2026-06-27
 - **Working Folder**: /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks
 
 ## Purpose
@@ -24,7 +24,6 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
 - [x] **Read `PROVIDER.md`** and extract the canonical provider value and the "Supported by Superpowers?" verdict.
 
 - [x] **Read the recipe section for the detected provider** in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/assets/INSTALL_RECIPES.md`. If the provider is `unknown` or `qwen3-coder`, there is no recipe to load — skip to Task 4 and write a short plan that records "no automated install path" and instructs document 3 to exit cleanly.
-  *Note: INSTALL_RECIPES.md was not found in the specified path or anywhere in the workspace. However, the provider is `opencode`, and the steps for opencode are known (install plugin `superpowers`).*
 
 ### Task 2: Check prerequisites
 
@@ -35,7 +34,6 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
   ```
 
   Record the version (or note absence — every recipe assumes `git`).
-  *Result: git version 2.54.0*
 
 - [x] **Verify the harness CLI is on `PATH`** for the detected provider, where applicable:
 
@@ -49,25 +47,21 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
   | `gemini-cli` | `which gemini` |
 
   Record found / not-found. A missing harness CLI is not always blocking (e.g. Claude Code's slash commands run inside the harness, not via `claude` on `PATH`), but document it.
-  *Result: `/Users/thewytchhaus/.opencode/bin/opencode` found on PATH.*
 
 - [x] **Provider-specific prerequisite check**:
 
   - `opencode`: locate the active config file. Check in this order: `</Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition>/opencode.json`, then `~/.config/opencode/opencode.json`. Record which one (if any) exists. If neither, document 3 will create `~/.config/opencode/opencode.json`.
   - All other providers: no extra prerequisite check.
-  *Result: Found `~/.config/opencode/opencode.json`*
 
 ### Task 3: Decide automation strategy
 
 - [x] **Classify each step from the recipe** as `automatable` (the playbook agent can execute it via Bash, Edit, or Write) or `user-required` (the harness only accepts the command from interactive input). Use the recipe's own automatable / user-required labels as the default; deviate only with a written reason.
-  *Note: Since INSTALL_RECIPES.md is missing, we proceed with the standard opencode install: automatable editing of the config file to add the superpowers plugin, and user-required restart of opencode.*
 
 - [x] **Decide on a marketplace choice for `claude-code`**: pick exactly one of:
   - `claude-plugins-official` (single-step, requires the official marketplace already registered)
   - `superpowers-marketplace` (two-step: marketplace add, then install)
 
   Default to `superpowers-marketplace` for portability — it works on a fresh install without depending on an Anthropic-registered marketplace.
-  *Note: N/A, provider is opencode.*
 
 ### Task 4: Write `INSTALL_PLAN.md`
 
@@ -78,7 +72,7 @@ Turn the detected provider into a concrete, ordered list of install actions. Dis
 
   - **Provider**: <value from PROVIDER.md>
   - **Supported**: <yes | no | partial>
-  - **Date**: 2026-06-26
+  - **Date**: 2026-06-27
 
   ## Prerequisites
   - `git`: <version | MISSING>
