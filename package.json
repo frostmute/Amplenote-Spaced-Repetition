@@ -5,6 +5,7 @@
   "main": "plugin.js",
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,json,md}\""
   },
