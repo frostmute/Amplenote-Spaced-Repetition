@@ -1,5 +1,9 @@
 node_modules/
 .env
+.maestro/
+coverage/
+.nyc_output/
+.DS_Store
 
 # Internal / Development only
 tests/fixtures/
@@ -7,5 +11,5 @@ Example Notes/
 get_bounty.js
 terms.html
 parse_html.py
-\n.DS_Store\n
 tasks.md
+
