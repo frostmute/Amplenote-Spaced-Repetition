@@ -1,4 +1,4 @@
-({
+module.exports = {
   // --- Markdown / Parser helpers ---
 
   _parseCells: function (line) {
@@ -1258,7 +1258,7 @@ ___
     }
     
     // Eliminate all compounding slashes indiscriminately so they don't corrupt the note visually
-    newContent = newContent.replace(/\\\\/g, '');
+    newContent = newContent.replace(/\\\\\\\\/g, '');
     await note.replaceContent(newContent);
   },
-});
+};
