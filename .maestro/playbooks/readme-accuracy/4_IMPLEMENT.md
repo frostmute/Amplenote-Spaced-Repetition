@@ -21,7 +21,7 @@ Implement ONE documentation fix from `/Users/thewytchhaus/Documents/GitHub/Ample
 
 ## Implementation Checklist
 
-- [x] **Fix one documentation gap (or skip if none)**: Read /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, find an item with status exactly `PENDING`, implement the fix in the project's README.md, mark as IMPLEMENTED in the plan, and log to /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/USAGE_LOG_Amplenote SRS_2026-06-27.md. Only fix ONE gap per task.
+- [ ] **Fix one documentation gap (or skip if none)**: Read /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, find an item with status exactly `PENDING`, implement the fix in the project's README.md, mark as IMPLEMENTED in the plan, and log to /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/USAGE_LOG_Amplenote SRS_2026-06-27.md. Only fix ONE gap per task.
 
 ## Fix Types
 
@@ -110,8 +110,8 @@ After implementing, update `LOOP_00001_PLAN.md`:
 - **Status:** `IMPLEMENTED`  ← Changed from PENDING
 - **Implemented In:** Loop 00001
 - **Changes Made:**
-  - [x] Added feature description
-  - [x] Added usage example
+  - [ ] Added feature description
+  - [ ] Added usage example
 ```
 
 ## Guidelines
