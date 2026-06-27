@@ -1,49 +1,69 @@
 ({
   // --- Markdown / Parser helpers ---
 
-  _parseCells: function(line) {
+  _parseCells: function (line) {
     const cells = [];
     let current = '';
     let inCode = false;
     for (let i = 0; i < line.length; i++) {
       if (line[i] === '`') {
-        if (line.slice(i, i + 3) === '```') { inCode = !inCode; i += 2; }
-        else { inCode = !inCode; }
+        if (line.slice(i, i + 3) === '```') {
+          inCode = !inCode;
+          i += 2;
+        } else {
+          inCode = !inCode;
+        }
       }
-      if (line[i] === '|' && !inCode) { cells.push(current); current = ''; }
-      else { current += line[i]; }
+      if (line[i] === '|' && !inCode) {
+        cells.push(current);
+        current = '';
+      } else {
+        current += line[i];
+      }
     }
     cells.push(current);
     // Remove leading/trailing empty fragments caused by outermost pipe delimiters
     if (cells.length >= 2) {
-      return cells.slice(1, -1).map(c => c.trim());
+      return cells.slice(1, -1).map((c) => c.trim());
     }
-    return cells.map(c => c.trim());
+    return cells.map((c) => c.trim());
   },
 
-  _extractFlashcardsFromMarkdown: function(content) {
+  _extractFlashcardsFromMarkdown: function (content) {
     const flashcards = [];
+    if (!content || typeof content !== 'string') return { flashcards, lines: [] };
     const lines = content.split('\n');
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim().startsWith('|')) continue;
 
-      const headers = this._parseCells(line).map(h => h.toLowerCase().trim().replace(/<!--.*?-->/g, '').trim());
+      const headers = this._parseCells(line).map((h) =>
+        h
+          .toLowerCase()
+          .trim()
+          .replace(/<!--.*?-->/g, '')
+          .trim()
+      );
       const qIdx = headers.indexOf('question');
       const aIdx = headers.indexOf('answer');
-      
+
       // Look for srs_data in the original headers (since we might have hidden it in a comment)
-      const originalHeadersLower = this._parseCells(line).map(h => h.toLowerCase().trim());
+      const originalHeadersLower = this._parseCells(line).map((h) => h.toLowerCase().trim());
       let srsIdx = originalHeadersLower.indexOf('srs_data');
       if (srsIdx === -1) {
-        srsIdx = originalHeadersLower.findIndex(h => h.includes('srs_data') || h.includes('<!--srs_data-->'));
+        srsIdx = originalHeadersLower.findIndex(
+          (h) => h.includes('srs_data') || h.includes('<!--srs_data-->')
+        );
       }
       if (qIdx === -1 || aIdx === -1) continue;
 
       i++; // move past header
       // Skip separator row if present (strict: must be ONLY pipes, dashes, colons, spaces)
-      if (i < lines.length && /^\s*\|[\s\-:|]+\|$/.test(lines[i].replace(/<!--.*?-->/g, '').trim())) {
+      if (
+        i < lines.length &&
+        /^\s*\|[\s\-:|]+\|$/.test(lines[i].replace(/<!--.*?-->/g, '').trim())
+      ) {
         i++;
       }
 
@@ -51,28 +71,34 @@
         const cells = this._parseCells(lines[i]);
 
         // Detect if this row is another header row (empty rows acting as headers in Amplenote)
-        const rowLower = cells.map(c => c.toLowerCase().trim());
-        if (rowLower.some(h => h === 'question' || h.includes('question<!--')) && 
-            rowLower.some(h => h === 'answer' || h.includes('answer<!--'))) {
+        const rowLower = cells.map((c) => c.toLowerCase().trim());
+        if (
+          rowLower.some((h) => h === 'question' || h.includes('question<!--')) &&
+          rowLower.some((h) => h === 'answer' || h.includes('answer<!--'))
+        ) {
           break;
         }
 
         // Skip completely empty rows
-        if (rowLower.every(c => c === '')) {
+        if (rowLower.every((c) => c === '')) {
           i++;
           continue;
         }
 
-        if (cells.length > Math.max(qIdx, aIdx) || cells.some(c => c && c.trim().length > 0)) {
+        if (cells.length > Math.max(qIdx, aIdx) || cells.some((c) => c && c.trim().length > 0)) {
           // Amplenote sometimes shifts columns right with empty leading cells
           let rowQIdx = qIdx;
           let rowAIdx = aIdx;
           let rowSrsIdx = srsIdx;
 
           if (!cells[0] || cells[0].trim() === '') {
-            const headerFirstContentIdx = headers.findIndex(h => h.trim().length > 0);
-            const rowFirstContentIdx = cells.findIndex(c => c && c.trim().length > 0);
-            if (rowFirstContentIdx > -1 && headerFirstContentIdx > -1 && rowFirstContentIdx !== headerFirstContentIdx) {
+            const headerFirstContentIdx = headers.findIndex((h) => h.trim().length > 0);
+            const rowFirstContentIdx = cells.findIndex((c) => c && c.trim().length > 0);
+            if (
+              rowFirstContentIdx > -1 &&
+              headerFirstContentIdx > -1 &&
+              rowFirstContentIdx !== headerFirstContentIdx
+            ) {
               const shift = rowFirstContentIdx - headerFirstContentIdx;
               if (qIdx !== -1 && cells.length > qIdx + shift) rowQIdx = qIdx + shift;
               if (aIdx !== -1 && cells.length > aIdx + shift) rowAIdx = aIdx + shift;
@@ -80,18 +106,32 @@
             }
           }
 
-          let q = rowQIdx !== -1 && cells[rowQIdx] !== undefined ? cells[rowQIdx].replace(/<!--.*?-->/g, '').trim() : '';
-          let a = rowAIdx !== -1 && cells[rowAIdx] !== undefined ? cells[rowAIdx].replace(/<!--.*?-->/g, '').trim() : '';
+          let q =
+            rowQIdx !== -1 && cells[rowQIdx] !== undefined
+              ? cells[rowQIdx].replace(/<!--.*?-->/g, '').trim()
+              : '';
+          let a =
+            rowAIdx !== -1 && cells[rowAIdx] !== undefined
+              ? cells[rowAIdx].replace(/<!--.*?-->/g, '').trim()
+              : '';
 
           // Fallback to original unshifted indices if shift gave us nothing
           if (q === '' && a === '') {
-            q = qIdx !== -1 && cells[qIdx] !== undefined ? cells[qIdx].replace(/<!--.*?-->/g, '').trim() : '';
-            a = aIdx !== -1 && cells[aIdx] !== undefined ? cells[aIdx].replace(/<!--.*?-->/g, '').trim() : '';
+            q =
+              qIdx !== -1 && cells[qIdx] !== undefined
+                ? cells[qIdx].replace(/<!--.*?-->/g, '').trim()
+                : '';
+            a =
+              aIdx !== -1 && cells[aIdx] !== undefined
+                ? cells[aIdx].replace(/<!--.*?-->/g, '').trim()
+                : '';
             rowSrsIdx = srsIdx;
           }
 
           // Final fallback: first and second non-empty cells
-          const nonEmpty = cells.map((c, idx) => ({ c: c.trim(), idx })).filter(x => x.c.length > 0);
+          const nonEmpty = cells
+            .map((c, idx) => ({ c: c.trim(), idx }))
+            .filter((x) => x.c.length > 0);
           if (!q || q === '') {
             if (nonEmpty.length > 0) q = nonEmpty[0].c;
           }
@@ -101,7 +141,7 @@
               if (q === nonEmpty[0].c) {
                 a = nonEmpty[1].c;
               } else {
-                const qIdxInNonEmpty = nonEmpty.findIndex(n => n.c === q);
+                const qIdxInNonEmpty = nonEmpty.findIndex((n) => n.c === q);
                 if (qIdxInNonEmpty !== -1 && qIdxInNonEmpty + 1 < nonEmpty.length) {
                   a = nonEmpty[qIdxInNonEmpty + 1].c;
                 } else {
@@ -124,7 +164,9 @@
                 srsData = JSON.parse(atob(decodeURIComponent(cleanSrs)));
               } catch (e1) {
                 try {
-                  srsData = JSON.parse(atob(srsField.replace(/<!--/g, '').replace(/-->/g, '').trim()));
+                  srsData = JSON.parse(
+                    atob(srsField.replace(/<!--/g, '').replace(/-->/g, '').trim())
+                  );
                 } catch (e2) {
                   try {
                     srsData = JSON.parse(srsField.replace(/<!--/g, '').replace(/-->/g, '').trim());
@@ -136,7 +178,7 @@
               lineIndex: i,
               question: q,
               answer: a,
-              ...srsData
+              ...srsData,
             });
           }
         }
@@ -148,25 +190,38 @@
     return { flashcards, lines };
   },
 
-  _updateFlashcardInLines: function(lines, card) {
+  _updateFlashcardInLines: function (lines, card) {
     const targetLine = lines[card.lineIndex];
     if (!targetLine) return false;
 
     let headerLineIdx = -1;
     for (let i = card.lineIndex - 1; i >= 0; i--) {
       if (lines[i].trim().startsWith('|')) {
-        const h = this._parseCells(lines[i]).map(c => c.toLowerCase().trim().replace(/<!--.*?-->/g, '').trim());
-        if (h.includes('question') && h.includes('answer')) { headerLineIdx = i; break; }
+        const h = this._parseCells(lines[i]).map((c) =>
+          c
+            .toLowerCase()
+            .trim()
+            .replace(/<!--.*?-->/g, '')
+            .trim()
+        );
+        if (h.includes('question') && h.includes('answer')) {
+          headerLineIdx = i;
+          break;
+        }
       }
     }
     if (headerLineIdx === -1) return false;
 
-    const originalHeadersLower = this._parseCells(lines[headerLineIdx]).map(h => h.toLowerCase().trim());
-    const headers = originalHeadersLower.map(h => h.replace(/<!--.*?-->/g, '').trim());
+    const originalHeadersLower = this._parseCells(lines[headerLineIdx]).map((h) =>
+      h.toLowerCase().trim()
+    );
+    const headers = originalHeadersLower.map((h) => h.replace(/<!--.*?-->/g, '').trim());
     const qIdx = headers.indexOf('question');
     let srsIdx = originalHeadersLower.indexOf('srs_data');
     if (srsIdx === -1) {
-      srsIdx = originalHeadersLower.findIndex(h => h.includes('srs_data') || h.includes('<!--srs_data-->'));
+      srsIdx = originalHeadersLower.findIndex(
+        (h) => h.includes('srs_data') || h.includes('<!--srs_data-->')
+      );
     }
     if (qIdx === -1) return false;
 
@@ -177,54 +232,67 @@
       const headerCells = this._parseCells(lines[headerLineIdx]);
       headerCells.push('<!--SRS_DATA-->');
       // Trim empty trailing cells so we don't inflate
-      while(headerCells.length > 2 && headerCells[headerCells.length - 2] === '') {
-          headerCells.splice(headerCells.length - 2, 1);
-          srsIdx--;
+      while (headerCells.length > 2 && headerCells[headerCells.length - 2] === '') {
+        headerCells.splice(headerCells.length - 2, 1);
+        srsIdx--;
       }
       lines[headerLineIdx] = '| ' + headerCells.join(' | ') + ' |';
 
       // Update separator row if present
       const sepIdx = headerLineIdx + 1;
-      if (sepIdx < lines.length && /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())) {
+      if (
+        sepIdx < lines.length &&
+        /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())
+      ) {
         const sepCells = this._parseCells(lines[sepIdx]);
-        while(sepCells.length < headerCells.length) sepCells.push('---');
-        while(sepCells.length > headerCells.length) sepCells.pop();
+        while (sepCells.length < headerCells.length) sepCells.push('---');
+        while (sepCells.length > headerCells.length) sepCells.pop();
         lines[sepIdx] = '| ' + sepCells.join(' | ') + ' |';
       }
-      
-      // We must explicitly clean up the other rows in the table to match the column count, 
+
+      // We must explicitly clean up the other rows in the table to match the column count,
       // or Amplenote's exporter goes crazy.
-      let r = (sepIdx < lines.length && /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())) ? sepIdx + 1 : headerLineIdx + 1;
+      let r =
+        sepIdx < lines.length &&
+        /^\s*\|[\s\-:|]+\|$/.test(lines[sepIdx].replace(/<!--.*?-->/g, '').trim())
+          ? sepIdx + 1
+          : headerLineIdx + 1;
       while (r < lines.length && lines[r].trim().startsWith('|')) {
         const rowCells = this._parseCells(lines[r]);
-        const rowLower = rowCells.map(c => c.toLowerCase().trim());
-        if (rowLower.some(h => h === 'question') && rowLower.some(h => h === 'answer')) break;
-        
-        while(rowCells.length > headerCells.length) rowCells.pop();
-        while(rowCells.length < headerCells.length) rowCells.push('');
+        const rowLower = rowCells.map((c) => c.toLowerCase().trim());
+        if (rowLower.some((h) => h === 'question') && rowLower.some((h) => h === 'answer')) break;
+
+        while (rowCells.length > headerCells.length) rowCells.pop();
+        while (rowCells.length < headerCells.length) rowCells.push('');
         lines[r] = '| ' + rowCells.join(' | ') + ' |';
         r++;
       }
     }
 
     const cells = this._parseCells(lines[card.lineIndex]);
-    
+
     // Explicitly align the cell count to match headers to prevent column inflation
     const headerCells = this._parseCells(lines[headerLineIdx]);
     while (cells.length < headerCells.length) cells.push('');
     while (cells.length > headerCells.length) cells.pop();
 
     const srsData = {
-      interval: card.interval, easinessFactor: card.easinessFactor,
-      nextReview: card.nextReview, reps: card.reps, lapses: card.lapses || 0,
-      stability: card.stability, difficulty: card.difficulty,
-      elapsed_days: card.elapsed_days, scheduled_days: card.scheduled_days,
-      state: card.state, last_review: card.last_review
+      interval: card.interval,
+      easinessFactor: card.easinessFactor,
+      nextReview: card.nextReview,
+      reps: card.reps,
+      lapses: card.lapses || 0,
+      stability: card.stability,
+      difficulty: card.difficulty,
+      elapsed_days: card.elapsed_days,
+      scheduled_days: card.scheduled_days,
+      state: card.state,
+      last_review: card.last_review,
     };
-    
+
     // Encode to base64, then wrap in an HTML comment so it is invisible to the user in the note editor
     const encodedSrs = btoa(JSON.stringify(srsData));
-    
+
     // Actually, Amplenote ignores HTML comments during table rendering.
     // If we wrap the whole SRS column data in <!--...-->, it hides it completely.
     // Furthermore, we can even remove the SRS_DATA header entirely, but Amplenote's Markdown parser expects a header.
@@ -239,7 +307,7 @@
     // Wait, the test document has `| | | | | | \n |-|-|-|-|-| \n |Question|Answer|||| \n |What does DOM stand for?|Document Object Model||||`
     // Oh! Amplenote's exporter is creating massive arrays of empty columns because we did `while (cells.length <= srsIdx) cells.push('');`
     // And `srsIdx` got pushed out to 5 or 6 somehow! Let's prevent runaway column inflation.
-    
+
     // Trim empty trailing cells beyond srsIdx
     // Actually, we just enforced strict cell length matching above, so this block is no longer needed
     // and might interfere if the SRS idx isn't the absolute last column for some reason.
@@ -251,36 +319,58 @@
     return true;
   },
 
-  _linesToMarkdown: function(lines) {
+  _linesToMarkdown: function (lines) {
     return lines.join('\n');
   },
 
-  _escapeHtml: function(text) {
+  _escapeHtml: function (text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    let escaped = text.replace(/[&<>"']/g, m => map[m]);
-    // Amplenote aggressively escapes markdown brackets inside tables. 
+    let escaped = text.replace(/[&<>"']/g, (m) => map[m]);
+    // Amplenote aggressively escapes markdown brackets inside tables.
     // We strip these stray backslashes before rendering them in the flashcard UI.
     escaped = escaped.replace(/\\\[/g, '[').replace(/\\\]/g, ']');
     return escaped;
   },
 
-  _createScheduler: function() {
-    const w = [0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0589, 1.5330, 0.1544, 1.0071, 1.9395, 0.1100, 0.2900, 2.2700, 0.2500, 2.9898, 0.5100, 0.4300];
+  _createScheduler: function () {
+    const w = [
+      0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0589, 1.533, 0.1544, 1.0071,
+      1.9395, 0.11, 0.29, 2.27, 0.25, 2.9898, 0.51, 0.43,
+    ];
 
-    function initStability(rating) { return Math.max(w[rating - 1], 0.1); }
-    function initDifficulty(rating) { return Math.min(Math.max(w[4] - Math.exp(w[5] * (rating - 1)) + 1, 1), 10); }
+    function initStability(rating) {
+      return Math.max(w[rating - 1], 0.1);
+    }
+    function initDifficulty(rating) {
+      return Math.min(Math.max(w[4] - Math.exp(w[5] * (rating - 1)) + 1, 1), 10);
+    }
     function nextDifficulty(d, rating) {
       const next = d - w[6] * (rating - 3);
       return Math.min(Math.max(meanReversion(w[4], next), 1), 10);
     }
-    function meanReversion(init, current) { return w[7] * init + (1 - w[7]) * current; }
-    function retrievability(elapsed, stability) { return Math.pow(1 + (0.9 / stability) * elapsed, -1 / 0.1); }
+    function meanReversion(init, current) {
+      return w[7] * init + (1 - w[7]) * current;
+    }
+    function retrievability(elapsed, stability) {
+      return Math.pow(1 + (0.9 / stability) * elapsed, -1 / 0.1);
+    }
     function nextRecallStability(d, s, r, rating) {
       const hardPenalty = rating === 2 ? w[15] : 1;
       const easyBonus = rating === 4 ? w[16] : 1;
-      return s * (Math.exp(w[8]) * (11 - d) * Math.pow(s, -w[9]) * (Math.exp(w[10] * (1 - r)) - 1) * hardPenalty * easyBonus + 1);
+      return (
+        s *
+        (Math.exp(w[8]) *
+          (11 - d) *
+          Math.pow(s, -w[9]) *
+          (Math.exp(w[10] * (1 - r)) - 1) *
+          hardPenalty *
+          easyBonus +
+          1)
+      );
     }
-    function nextForgetStability(d, s, r) { return w[11] * Math.pow(d, -w[12]) * (Math.pow(s + 1, w[13]) - 1) * Math.exp(w[14] * (1 - r)); }
+    function nextForgetStability(d, s, r) {
+      return w[11] * Math.pow(d, -w[12]) * (Math.pow(s + 1, w[13]) - 1) * Math.exp(w[14] * (1 - r));
+    }
     function nextInterval(stability) {
       const newInterval = (stability / 0.9) * (Math.pow(0.9, -1 / 0.1) - 1);
       return Math.max(Math.round(newInterval), 1);
@@ -295,8 +385,13 @@
         if (isNew) {
           stability = initStability(rating);
           difficulty = initDifficulty(rating);
-          if (rating === 1) { interval = 0; state = 3; }
-          else { interval = rating === 4 ? 4 : 1; state = 2; }
+          if (rating === 1) {
+            interval = 0;
+            state = 3;
+          } else {
+            interval = rating === 4 ? 4 : 1;
+            state = 2;
+          }
         } else {
           const lastReview = card.last_review ? new Date(card.last_review) : now;
           const elapsed = Math.max(0, Math.floor((now - lastReview) / 86400000));
@@ -304,10 +399,12 @@
           difficulty = nextDifficulty(card.difficulty || 5, rating);
           if (rating === 1) {
             stability = nextForgetStability(difficulty, card.stability || 1, r);
-            interval = 0; state = 3;
+            interval = 0;
+            state = 3;
           } else {
             stability = nextRecallStability(difficulty, card.stability || 1, r, rating);
-            interval = nextInterval(stability); state = 2;
+            interval = nextInterval(stability);
+            state = 2;
           }
         }
 
@@ -315,15 +412,18 @@
         due.setDate(due.getDate() + interval);
 
         return {
-          stability, difficulty, interval, state,
+          stability,
+          difficulty,
+          interval,
+          state,
           reps: (card.reps || 0) + 1,
-          lapses: rating === 1 ? (card.lapses || 0) + 1 : (card.lapses || 0),
+          lapses: rating === 1 ? (card.lapses || 0) + 1 : card.lapses || 0,
           elapsed_days: interval,
           scheduled_days: interval,
           due: due.toISOString(),
-          last_review: now.toISOString()
+          last_review: now.toISOString(),
         };
-      }
+      },
     };
   },
 
@@ -331,81 +431,117 @@
 
   // --- Core review logic ---
 
-  _collectDueCards: async function(app, tags) {
-    // app.filterNotes expects a string for the 'tag' property in some versions, 
-    // or sometimes an array. If 'tags' is an array, we should extract the first element 
-    // or pass it directly. Amplenote's API: `app.filterNotes({ tag: "my-tag" })`
-    const tagQuery = Array.isArray(tags) ? tags[0] : tags;
-    const noteHandles = await app.filterNotes({ tag: tagQuery });
-    if (noteHandles.length === 0) { await app.alert("No notes found with the selected tags."); return []; }
-
-    let allFlashcards = [];
-    for (const noteHandle of noteHandles) {
-      const note = await app.notes.find(noteHandle.uuid);
-      if (note) {
-        const content = await note.content();
-        const { flashcards } = this._extractFlashcardsFromMarkdown(content);
-        flashcards.forEach(card => { card.noteUUID = note.uuid; });
-        allFlashcards = allFlashcards.concat(flashcards);
+  _collectDueCards: async function (app, tags) {
+    try {
+      // app.filterNotes expects a string for the 'tag' property in some versions,
+      // or sometimes an array. If 'tags' is an array, we should extract the first element
+      // or pass it directly. Amplenote's API: `app.filterNotes({ tag: "my-tag" })`
+      const tagQuery = Array.isArray(tags) ? tags[0] : tags;
+      const noteHandles = await app.filterNotes({ tag: tagQuery });
+      if (noteHandles.length === 0) {
+        await app.alert('No notes found with the selected tags.');
+        return [];
       }
-    }
 
-    const now = new Date();
-    let dueCards = allFlashcards.filter(card => {
-      const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
-      return nextReview <= now;
-    });
-
-    if (dueCards.length === 0) { await app.alert("No flashcards are due for review!"); return []; }
-
-    // Apply Custom Sort Order
-    let reviewOrder = "Due Date (Oldest First)";
-    if (app.settings && app.settings["Review Order"]) {
-      reviewOrder = app.settings["Review Order"];
-    }
-
-    if (reviewOrder === "Random") {
-      // Fisher-Yates shuffle
-      for (let i = dueCards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [dueCards[i], dueCards[j]] = [dueCards[j], dueCards[i]];
+      let allFlashcards = [];
+      for (const noteHandle of noteHandles) {
+        try {
+          const note = await app.notes.find(noteHandle.uuid);
+          if (note) {
+            const content = await note.content();
+            if (content) {
+              const { flashcards } = this._extractFlashcardsFromMarkdown(content);
+              flashcards.forEach((card) => {
+                card.noteUUID = note.uuid;
+              });
+              allFlashcards = allFlashcards.concat(flashcards);
+            }
+          }
+        } catch (noteError) {
+          console.error(noteError);
+        }
       }
-    } else if (reviewOrder === "Easiness (Hardest First)") {
-      dueCards.sort((a, b) => {
-        // Lower easinessFactor / stability means it's harder
-        const aDiff = a.easinessFactor || 0;
-        const bDiff = b.easinessFactor || 0;
-        return aDiff - bDiff; 
+
+      const now = new Date();
+      let dueCards = allFlashcards.filter((card) => {
+        const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
+        return isNaN(nextReview.getTime()) ? true : nextReview <= now;
       });
-    } else {
-      // Default: Due Date (Oldest First)
-      dueCards.sort((a, b) => {
-        const dateA = a.nextReview ? new Date(a.nextReview).getTime() : 0;
-        const dateB = b.nextReview ? new Date(b.nextReview).getTime() : 0;
-        return dateA - dateB;
-      });
-    }
 
-    // Enforce Daily Review Limit if specified in settings
-    if (app.settings && app.settings["Daily Review Limit"]) {
-      const limit = parseInt(app.settings["Daily Review Limit"], 10);
-      if (!isNaN(limit) && limit > 0 && dueCards.length > limit) {
-        dueCards = dueCards.slice(0, limit);
+      if (dueCards.length === 0) {
+        await app.alert('No flashcards are due for review!');
+        return [];
       }
-    }
 
-    return dueCards;
+      // Apply Custom Sort Order
+      let reviewOrder = 'Due Date (Oldest First)';
+      if (app.settings && app.settings['Review Order']) {
+        reviewOrder = app.settings['Review Order'];
+      }
+
+      if (reviewOrder === 'Random') {
+        // Fisher-Yates shuffle
+        for (let i = dueCards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [dueCards[i], dueCards[j]] = [dueCards[j], dueCards[i]];
+        }
+      } else if (reviewOrder === 'Easiness (Hardest First)') {
+        dueCards.sort((a, b) => {
+          // Lower easinessFactor / stability means it's harder
+          const aDiff = a.easinessFactor || 0;
+          const bDiff = b.easinessFactor || 0;
+          return aDiff - bDiff;
+        });
+      } else {
+        // Default: Due Date (Oldest First)
+        dueCards.sort((a, b) => {
+          const dateA = a.nextReview ? new Date(a.nextReview).getTime() : 0;
+          const dateB = b.nextReview ? new Date(b.nextReview).getTime() : 0;
+          const timeA = isNaN(dateA) ? 0 : dateA;
+          const timeB = isNaN(dateB) ? 0 : dateB;
+          return timeA - timeB;
+        });
+      }
+
+      // Enforce Daily Review Limit if specified in settings
+      if (app.settings && app.settings['Daily Review Limit']) {
+        const limit = parseInt(app.settings['Daily Review Limit'], 10);
+        if (!isNaN(limit) && limit > 0 && dueCards.length > limit) {
+          dueCards = dueCards.slice(0, limit);
+        }
+      }
+
+      return dueCards;
+    } catch (e) {
+      console.error('Error in _collectDueCards:', e);
+      await app.alert('An error occurred while fetching due flashcards. Please try again.');
+      return [];
+    }
   },
 
-  _runReviewSession: async function(app, dueCards) {
-    this._currentReviewSession = { cards: dueCards, index: 0, ratingsCount: {1:0, 2:0, 3:0, 4:0} };
-    
+  _runReviewSession: async function (app, dueCards) {
+    if (!dueCards || dueCards.length === 0) return;
+    this._currentReviewSession = {
+      cards: dueCards,
+      index: 0,
+      ratingsCount: { 1: 0, 2: 0, 3: 0, 4: 0 },
+    };
+
     // Check context for mobile flag. If mobile, skip embed and go straight to prompt.
-    const context = (app.context && typeof app.context === 'object') ? app.context : (await app.getContext ? await app.getContext() : null);
-    const isMobile = context ? (context.environment === 'mobile' || context.isMobile) : false;
+    let isMobile = false;
+    try {
+      const context =
+        app.context && typeof app.context === 'object'
+          ? app.context
+          : (await app.getContext)
+            ? await app.getContext()
+            : null;
+      isMobile = context ? context.environment === 'mobile' || context.isMobile : false;
+    } catch (e) {
+      console.error('Error checking mobile context:', e);
+    }
 
     if (isMobile) {
-      // console.log("Mobile client detected, using free-tier prompt mode directly.");
       await this._runFreeTierPromptSession(app, dueCards);
       return;
     }
@@ -414,118 +550,139 @@
     try {
       // Pass card object directly — Amplenote handles serialization internally.
       // renderEmbed must be robust to receiving either an object or a JSON string.
-      await app.openSidebarEmbed(1, "Spaced Repetition Review", dueCards[0]);
+      await app.openSidebarEmbed(1, 'Spaced Repetition Review', dueCards[0]);
     } catch (e) {
-      console.error("openSidebarEmbed failed, falling back to free-tier prompt mode", e);
+      console.error('openSidebarEmbed failed, falling back to free-tier prompt mode', e);
       await this._runFreeTierPromptSession(app, dueCards);
     }
   },
 
-  _runFreeTierPromptSession: async function(app, dueCards) {
+  _runFreeTierPromptSession: async function (app, dueCards) {
+    if (!dueCards || dueCards.length === 0) return;
     let i = 0;
     let completed = 0;
     while (i < dueCards.length) {
       const card = dueCards[i];
-      
-      // Step 1: Show question
-      const showAnswer = await app.prompt(`Question ${i + 1} of ${dueCards.length}`, {
-        message: card.question,
-        submitAction: "Show Answer"
-      });
-      
-      if (showAnswer === false || showAnswer === null) break; // User cancelled
-      
-      // Step 2: Show answer and ask for rating
-      const ratingOptions = [
-        { label: "1. Again (Forgot)", value: "1" },
-        { label: "2. Hard", value: "2" },
-        { label: "3. Good", value: "3" },
-        { label: "4. Easy", value: "4" }
-      ];
-      
-      const ratingResult = await app.prompt(`Answer ${i + 1} of ${dueCards.length}`, {
-        message: `Q: ${card.question}\n\nA: ${card.answer}\n\nHow well did you remember this?`,
-        inputs: [{ type: "select", label: "Rating", options: ratingOptions }]
-      });
-      
-      if (!ratingResult) break; // User cancelled
-      
-      const rating = parseInt(ratingResult, 10);
-      this._currentReviewSession.ratingsCount[rating] = (this._currentReviewSession.ratingsCount[rating] || 0) + 1;
-      
-      // Process the rating
-      const updatedCard = this._updateCardSRS(card, rating);
-      await this._saveCardToNote(app, updatedCard);
-      completed++;
-      i++;
+      try {
+        // Step 1: Show question
+        const showAnswer = await app.prompt(`Question ${i + 1} of ${dueCards.length}`, {
+          message: card.question || 'No question text available',
+          submitAction: 'Show Answer',
+        });
+
+        if (showAnswer === false || showAnswer === null) break; // User cancelled
+
+        // Step 2: Show answer and ask for rating
+        const ratingOptions = [
+          { label: '1. Again (Forgot)', value: '1' },
+          { label: '2. Hard', value: '2' },
+          { label: '3. Good', value: '3' },
+          { label: '4. Easy', value: '4' },
+        ];
+
+        const ratingResult = await app.prompt(`Answer ${i + 1} of ${dueCards.length}`, {
+          message: `Q: ${card.question}\n\nA: ${card.answer}\n\nHow well did you remember this?`,
+          inputs: [{ type: 'select', label: 'Rating', options: ratingOptions }],
+        });
+
+        if (!ratingResult) break; // User cancelled
+
+        const rating = parseInt(ratingResult, 10);
+        if (isNaN(rating) || rating < 1 || rating > 4) {
+          console.warn('Invalid rating received:', ratingResult);
+          continue;
+        }
+        this._currentReviewSession.ratingsCount[rating] =
+          (this._currentReviewSession.ratingsCount[rating] || 0) + 1;
+
+        // Process the rating
+        const updatedCard = this._updateCardSRS(card, rating);
+        await this._saveCardToNote(app, updatedCard);
+        completed++;
+        i++;
+      } catch (e) {
+        console.error('Error during free tier review loop:', e);
+        await app.alert('An error occurred during the review. The session has been paused.');
+        break;
+      }
     }
-    
+    if (completed > 0) {
+      await this._updateDashboard(app, this._currentReviewSession);
+    }
     await app.alert(`Review Session Complete!\n\nYou reviewed ${completed} card(s).`);
   },
 
   noteOption: {
-    "Start Review Session": async function(app, noteUUID) {
+    'Start Review Session': async function (app, noteUUID) {
       // Need to capture `this` context for noteOption hooks
       const self = this;
-      
-      const tags = await app.prompt("Select tags to review", {
-        inputs: [{ label: "Tags", type: "tags", limit: 5 }]
-      });
-      if (!tags || tags.length === 0) {
-        // User cancelled or left empty
-        return;
-      }
+      try {
+        const tags = await app.prompt('Select tags to review', {
+          inputs: [{ label: 'Tags', type: 'tags', limit: 5 }],
+        });
+        if (!tags || tags.length === 0) {
+          // User cancelled or left empty
+          return;
+        }
 
-      const dueCards = await self._collectDueCards(app, tags);
-      if (!dueCards || dueCards.length === 0) {
-        // _collectDueCards already handles its own alerts if 0 cards are due,
-        // but we return just to be safe.
-        return;
-      }
+        const dueCards = await self._collectDueCards(app, tags);
+        if (!dueCards || dueCards.length === 0) {
+          // _collectDueCards already handles its own alerts if 0 cards are due,
+          // but we return just to be safe.
+          return;
+        }
 
-      await self._runReviewSession(app, dueCards);
-    }
+        await self._runReviewSession(app, dueCards);
+      } catch (e) {
+        console.error('Error starting review session from noteOption:', e);
+        await app.alert('Failed to start review session. Please check the logs.');
+      }
+    },
   },
 
   appOption: {
-    "Start Review Session": async function(app) {
+    'Start Review Session': async function (app) {
       // Need to capture `this` context for appOption hooks
       const self = this;
-      
-      let defaultTags = [];
-      if (app.settings && app.settings["Default Tags"]) {
-        defaultTags = app.settings["Default Tags"].split(',').map(t => t.trim());
-      }
-      
-      const promptInputs = [{ label: "Tags", type: "tags", limit: 5 }];
-      // Note: We cannot pre-fill the 'tags' input type in Amplenote easily via prompt yet, 
-      // but we can fallback to defaultTags if the user submits empty.
-      
-      let tags = await app.prompt("Select tags to review (leave blank to use defaults)", {
-        inputs: promptInputs
-      });
-      
-      // Handle prompt cancellation or empty submission
-      if (!tags || tags.length === 0) {
-         if (defaultTags.length > 0) {
-             tags = defaultTags;
-         } else {
-             await app.alert("No tags selected and no Default Tags configured. Exiting.");
-             return;
-         }
-      }
+      try {
+        let defaultTags = [];
+        if (app.settings && app.settings['Default Tags']) {
+          defaultTags = app.settings['Default Tags'].split(',').map((t) => t.trim());
+        }
 
-      const dueCards = await self._collectDueCards(app, tags);
-      if (!dueCards || dueCards.length === 0) {
-        // _collectDueCards handles its own alerts
-        return; 
-      }
+        const promptInputs = [{ label: 'Tags', type: 'tags', limit: 5 }];
+        // Note: We cannot pre-fill the 'tags' input type in Amplenote easily via prompt yet,
+        // but we can fallback to defaultTags if the user submits empty.
 
-      await self._runReviewSession(app, dueCards);
-    }
+        let tags = await app.prompt('Select tags to review (leave blank to use defaults)', {
+          inputs: promptInputs,
+        });
+
+        // Handle prompt cancellation or empty submission
+        if (!tags || tags.length === 0) {
+          if (defaultTags.length > 0) {
+            tags = defaultTags;
+          } else {
+            await app.alert('No tags selected and no Default Tags configured. Exiting.');
+            return;
+          }
+        }
+
+        const dueCards = await self._collectDueCards(app, tags);
+        if (!dueCards || dueCards.length === 0) {
+          // _collectDueCards handles its own alerts
+          return;
+        }
+
+        await self._runReviewSession(app, dueCards);
+      } catch (e) {
+        console.error('Error starting review session from noteOption:', e);
+        await app.alert('Failed to start review session. Please check the logs.');
+      }
+    },
   },
 
-  renderEmbed: async function(app, ...args) {
+  renderEmbed: async function (app, ...args) {
     // Amplenote may pass the card as an object directly or as a JSON string.
     // It may also pass internal args before our data. Scan all args for a valid card.
     let card = null;
@@ -567,7 +724,12 @@
     }
 
     // Final fallback: read from session state
-    if (!card && !isComplete && this._currentReviewSession && this._currentReviewSession.cards.length > 0) {
+    if (
+      !card &&
+      !isComplete &&
+      this._currentReviewSession &&
+      this._currentReviewSession.cards.length > 0
+    ) {
       const session = this._currentReviewSession;
       card = session.cards[session.index] || {};
     }
@@ -575,21 +737,17 @@
     card = card || {};
 
     const session = this._currentReviewSession;
-    const progress = session
-      ? `${session.index + 1} / ${session.cards.length}`
-      : '1 / 1';
-    const barPct = session
-      ? Math.round((session.index / session.cards.length) * 100)
-      : 0;
+    const progress = session ? `${session.index + 1} / ${session.cards.length}` : '1 / 1';
+    const barPct = session ? Math.round((session.index / session.cards.length) * 100) : 0;
 
     if (isComplete || card._complete) {
-      const stats = completeStats || card.stats || {1:0, 2:0, 3:0, 4:0};
+      const stats = completeStats || card.stats || { 1: 0, 2: 0, 3: 0, 4: 0 };
       const total = completeTotal || card.total || 1;
       const avgEf = completeAvgEf || card.avgEf || 0;
-      const p1 = Math.round((stats[1]/total)*100)||0;
-      const p2 = Math.round((stats[2]/total)*100)||0;
-      const p3 = Math.round((stats[3]/total)*100)||0;
-      const p4 = Math.round((stats[4]/total)*100)||0;
+      const p1 = Math.round((stats[1] / total) * 100) || 0;
+      const p2 = Math.round((stats[2] / total) * 100) || 0;
+      const p3 = Math.round((stats[3] / total) * 100) || 0;
+      const p4 = Math.round((stats[4] / total) * 100) || 0;
 
       return `<!DOCTYPE html>
 <html>
@@ -628,16 +786,16 @@ p{color:#94a3b8;font-size:1.05em;line-height:1.5;margin-bottom:24px;}
   <p>Great work! You cleared your queue.</p>
   
   <div class="chart">
-    <div class="bar-col"><div class="bar-v">${stats[1]||0}</div><div class="bar b1" style="height:${Math.max(p1, 2)}%"></div><div class="bar-l">AGAIN</div></div>
-    <div class="bar-col"><div class="bar-v">${stats[2]||0}</div><div class="bar b2" style="height:${Math.max(p2, 2)}%"></div><div class="bar-l">HARD</div></div>
-    <div class="bar-col"><div class="bar-v">${stats[3]||0}</div><div class="bar b3" style="height:${Math.max(p3, 2)}%"></div><div class="bar-l">GOOD</div></div>
-    <div class="bar-col"><div class="bar-v">${stats[4]||0}</div><div class="bar b4" style="height:${Math.max(p4, 2)}%"></div><div class="bar-l">EASY</div></div>
+    <div class="bar-col"><div class="bar-v">${stats[1] || 0}</div><div class="bar b1" style="height:${Math.max(p1, 2)}%"></div><div class="bar-l">AGAIN</div></div>
+    <div class="bar-col"><div class="bar-v">${stats[2] || 0}</div><div class="bar b2" style="height:${Math.max(p2, 2)}%"></div><div class="bar-l">HARD</div></div>
+    <div class="bar-col"><div class="bar-v">${stats[3] || 0}</div><div class="bar b3" style="height:${Math.max(p3, 2)}%"></div><div class="bar-l">GOOD</div></div>
+    <div class="bar-col"><div class="bar-v">${stats[4] || 0}</div><div class="bar b4" style="height:${Math.max(p4, 2)}%"></div><div class="bar-l">EASY</div></div>
   </div>
 
   <div class="sta">
     <div class="sta-item"><div class="v">${total}</div><div class="l">Reviewed</div></div>
     <div class="sta-item"><div class="v">100%</div><div class="l">Focus</div></div>
-    <div class="sta-item"><div class="v">${Math.round(avgEf*10)/10}</div><div class="l">Avg EF</div></div>
+    <div class="sta-item"><div class="v">${Math.round(avgEf * 10) / 10}</div><div class="l">Avg EF</div></div>
   </div>
 </div>
 </body>
@@ -706,7 +864,7 @@ function showAnswer() {
   answered = true;
   const card = document.getElementById('card');
   const answerBack = document.getElementById('answerBack');
-  answerBack.innerHTML = ${JSON.stringify(this._escapeHtml(card.answer || ""))};
+  answerBack.innerHTML = ${JSON.stringify(this._escapeHtml(card.answer || ''))};
   card.classList.add('flipped');
   document.getElementById('showBtn').style.display = 'none';
   document.getElementById('ratings').style.display = 'grid';
@@ -732,7 +890,7 @@ document.getElementById('mainWrap').focus();
 </html>`;
   },
 
-  onEmbedCall: async function(app, ...args) {
+  onEmbedCall: async function (app, ...args) {
     // Amplenote passes action as first arg, data as second arg.
     // The embed may call callAmplenotePlugin(action, data) or callAmplenotePlugin(JSON.stringify({action, ...})).
     let action = '';
@@ -743,7 +901,9 @@ document.getElementById('mainWrap').focus();
       action = args[0];
       const rawData = args[1];
       if (typeof rawData === 'string') {
-        try { data = JSON.parse(rawData); } catch (e) {}
+        try {
+          data = JSON.parse(rawData);
+        } catch (e) {}
       } else if (typeof rawData === 'object' && rawData !== null) {
         data = rawData;
       }
@@ -759,9 +919,10 @@ document.getElementById('mainWrap').focus();
       data = args[0];
     }
 
-    if (action === "rate") {
+    if (action === 'rate') {
       const ratingValue = parseInt(data.rating, 10);
-      this._currentReviewSession.ratingsCount[ratingValue] = (this._currentReviewSession.ratingsCount[ratingValue] || 0) + 1;
+      this._currentReviewSession.ratingsCount[ratingValue] =
+        (this._currentReviewSession.ratingsCount[ratingValue] || 0) + 1;
       const currentCard = this._currentReviewSession.cards[this._currentReviewSession.index];
       const updatedCard = this._updateCardSRS(currentCard, data.rating);
       await this._saveCardToNote(app, updatedCard);
@@ -774,11 +935,15 @@ document.getElementById('mainWrap').focus();
         await app.context.renderEmbed();
       } else {
         await this._updateDashboard(app, this._currentReviewSession);
-        await app.context.updateEmbedArgs({ 
-          _complete: true, 
-          stats: this._currentReviewSession.ratingsCount, 
+        await app.context.updateEmbedArgs({
+          _complete: true,
+          stats: this._currentReviewSession.ratingsCount,
           total: this._currentReviewSession.cards.length,
-          avgEf: this._currentReviewSession.cards.reduce((a,c)=>a+(c.stability||c.easinessFactor||0),0)/(this._currentReviewSession.cards.length||1)
+          avgEf:
+            this._currentReviewSession.cards.reduce(
+              (a, c) => a + (c.stability || c.easinessFactor || 0),
+              0
+            ) / (this._currentReviewSession.cards.length || 1),
         });
         await app.context.renderEmbed();
       }
@@ -787,29 +952,31 @@ document.getElementById('mainWrap').focus();
 
   // --- Internal state ---
 
-  _updateDashboard: async function(app, session) {
+  _updateDashboard: async function (app, session) {
     try {
       let dashboardNote = null;
       // Amplenote filterNotes tags must match exactly without the #
-      const notes = await app.filterNotes({ tag: "srs-dashboard" });
+      const notes = await app.filterNotes({ tag: 'srs-dashboard' });
       if (notes && notes.length > 0) {
         dashboardNote = await app.notes.find(notes[0].uuid);
       } else {
-        const newNoteUUID = await app.createNote("Spaced Repetition Dashboard", ["srs-dashboard"]);
+        const newNoteUUID = await app.createNote('Spaced Repetition Dashboard', ['srs-dashboard']);
         dashboardNote = await app.notes.find(newNoteUUID);
       }
 
       if (!dashboardNote) {
-        console.error("Dashboard note could not be found or created.");
+        console.error('Dashboard note could not be found or created.');
         return;
       }
 
-      let content = await dashboardNote.content() || "";
+      let content = (await dashboardNote.content()) || '';
       let stats = { totalReviews: 0, again: 0, hard: 0, good: 0, easy: 0 };
-      
+
       const statsMatch = content.match(/<!--STATS:(.*?)-->/);
       if (statsMatch) {
-        try { stats = JSON.parse(statsMatch[1]); } catch(e) {}
+        try {
+          stats = JSON.parse(statsMatch[1]);
+        } catch (e) {}
       }
 
       // Merge the new session stats directly
@@ -819,11 +986,18 @@ document.getElementById('mainWrap').focus();
       stats.good += session.ratingsCount[3] || 0;
       stats.easy += session.ratingsCount[4] || 0;
 
-      const againPct = stats.totalReviews > 0 ? Math.round((stats.again / stats.totalReviews) * 100) : 0;
-      const hardPct = stats.totalReviews > 0 ? Math.round((stats.hard / stats.totalReviews) * 100) : 0;
-      const goodPct = stats.totalReviews > 0 ? Math.round((stats.good / stats.totalReviews) * 100) : 0;
-      const easyPct = stats.totalReviews > 0 ? Math.round((stats.easy / stats.totalReviews) * 100) : 0;
-      const retention = stats.totalReviews > 0 ? Math.round(((stats.hard + stats.good + stats.easy) / stats.totalReviews) * 100) : 0;
+      const againPct =
+        stats.totalReviews > 0 ? Math.round((stats.again / stats.totalReviews) * 100) : 0;
+      const hardPct =
+        stats.totalReviews > 0 ? Math.round((stats.hard / stats.totalReviews) * 100) : 0;
+      const goodPct =
+        stats.totalReviews > 0 ? Math.round((stats.good / stats.totalReviews) * 100) : 0;
+      const easyPct =
+        stats.totalReviews > 0 ? Math.round((stats.easy / stats.totalReviews) * 100) : 0;
+      const retention =
+        stats.totalReviews > 0
+          ? Math.round(((stats.hard + stats.good + stats.easy) / stats.totalReviews) * 100)
+          : 0;
 
       const newContent = `# 🧠 Spaced Repetition Dashboard
 > This note is automatically updated by the Spaced Repetition plugin after every review session.
@@ -840,18 +1014,17 @@ ___
 | 🟣 Easy | ${stats.easy} | ${easyPct}% |
 
 <!--STATS:${JSON.stringify(stats)}-->`;
-      
+
       // Use app.replaceNoteContent explicitly with UUID object
       await app.replaceNoteContent({ uuid: dashboardNote.uuid }, newContent);
     } catch (e) {
-      console.error("Failed to update dashboard", e);
+      console.error('Failed to update dashboard', e);
     }
   },
 
-
   _currentReviewSession: { cards: [], index: 0 },
 
-  _updateCardSRS: function(card, rating) {
+  _updateCardSRS: function (card, rating) {
     const scheduler = this._createScheduler();
     const result = scheduler.next(card, rating);
     return {
@@ -866,36 +1039,42 @@ ___
       elapsed_days: result.elapsed_days,
       scheduled_days: result.scheduled_days,
       state: result.state,
-      last_review: result.last_review
+      last_review: result.last_review,
     };
   },
 
-  _saveCardToNote: async function(app, card) {
+  _saveCardToNote: async function (app, card) {
     const note = await app.notes.find(card.noteUUID);
     if (!note) return;
 
     const freshContent = await note.content();
     const { flashcards, lines } = this._extractFlashcardsFromMarkdown(freshContent);
 
-    const freshCard = flashcards.find(c =>
-      (c.question === card.question && c.answer === card.answer) ||
-      (c.answer === card.question) // fallback for corrupted rows where question landed in answer col
+    const freshCard = flashcards.find(
+      (c) =>
+        (c.question === card.question && c.answer === card.answer) || c.answer === card.question // fallback for corrupted rows where question landed in answer col
     );
-    if (!freshCard) { console.error("Failed to find card in note:", card.question); return; }
+    if (!freshCard) {
+      console.error('Failed to find card in note:', card.question);
+      return;
+    }
     card.lineIndex = freshCard.lineIndex;
 
     const targetLine = lines[card.lineIndex];
     const updated = this._updateFlashcardInLines(lines, card);
-    if (!updated) { console.error("Failed to update card line in note:", card.question); return; }
+    if (!updated) {
+      console.error('Failed to update card line in note:', card.question);
+      return;
+    }
 
     // If the line didn't change (other than SRS_DATA), try to only replace that specific block of text to prevent backslash compounding
     // across the entire document during replaceContent. But Amplenote API does not support line-by-line edit without UUIDs.
     // However, the backslash compounding happens because Amplenote's Markdown parser double-escapes on replaceContent.
     // Workaround: We only replace the exact text of the single row using replaceContent's `replace` parameter if it existed.
-    // But since replaceContent only takes (newContent), it replaces everything. 
+    // But since replaceContent only takes (newContent), it replaces everything.
     // Wait, `replaceContent` can take a second parameter! `note.replaceContent(newMarkdown, section)`!
     // Since we don't have the section, we can use `note.replaceContent(newContent)` but we must unescape the compounding slashes before sending it back!
-    
+
     // Unescape compounding backslashes that Amplenote generates on every read/write cycle
     // Note: If you have \ in your markdown, it will get reduced to nothing on each save.
     // This is necessary because Amplenote's API currently doubles backslashes inside tables on every full-note overwrite.
@@ -903,5 +1082,5 @@ ___
     // Eliminate all compounding slashes indiscriminately so they don't corrupt the note visually
     newContent = newContent.replace(/\\/g, '');
     await note.replaceContent(newContent);
-  }
-})
+  },
+});
