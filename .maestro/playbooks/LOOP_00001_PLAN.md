@@ -1,37 +1,30 @@
 # Documentation Fix Plan - Loop 00001
 
 ## Summary
-- **Total Gaps:** 2
-- **Auto-Fix (PENDING):** 2
+- **Total Gaps:** 1
+- **Auto-Fix (PENDING):** 1
 - **Needs Review:** 0
 - **Won't Do:** 0
 
-## Current README Accuracy: 90%
-## Target README Accuracy: 95%
+## Current README Accuracy: 95%
+## Target README Accuracy: 100%
 
 ---
 
 ## PENDING - Ready for Auto-Fix
 
-### DOC-001: Default Tags Setting\n- **Status:** `IMPLEMENTED`\n- **Implemented In:** Loop 00001\n- **Changes Made:**\n  - [x] Added feature description\n  - [x] Added usage example
-
-### DOC-002: Review Order Setting
+### DOC-001: Review Order Setting
 - **Status:** `PENDING`
-- **Gap ID:** GAP-002
+- **Gap ID:** GAP-001
 - **Type:** MISSING
-- **User Importance:** HIGH
+- **User Importance:** MEDIUM
 - **Fix Effort:** EASY
-- **README Section:** Setup & Configuration (needs a new section or addition to existing configuration notes)
+- **README Section:** Setup & Configuration
 - **Fix Description:**
-  Document the "Review Order" setting. Users should know they can change how cards are presented to them during a session.
+  Add a bullet point describing the "Review Order" setting in the "Setup & Configuration" section, noting the "Due Date (Oldest First)" default and "Random" options.
 - **Proposed Content:**
   ```markdown
-  ### Review Order
-
-  You can customize the order in which flashcards are presented during a study session via the plugin settings. The available options are:
-  - **Due Date (Oldest First):** Reviews cards that have been due the longest.
-  - **Random:** Presents cards in a random order.
-  - **Easiness (Hardest First):** Prioritizes cards you have found most difficult in the past.
+  * **Review Order** (Optional): Set to "Due Date (Oldest First)" by default. Change to "Random" to shuffle flashcards during review.
   ```
 
 ---
@@ -50,11 +43,10 @@ None
 
 Recommended sequence based on importance and dependencies:
 
-1. **DOC-001** - Default Tags Setting (HIGH, easy configuration option)
-2. **DOC-002** - Review Order Setting (HIGH, easy configuration option)
+1. **DOC-001** - Review Order Setting (MEDIUM, simple addition to Setup & Configuration)
 
 ## README Section Updates Needed
 
 | Section | Gaps to Fix | Action Needed |
 |---------|-------------|---------------|
-| Configuration (or similar) | DOC-001, DOC-002 | Add details for the new settings |
+| Setup & Configuration | DOC-001 | Add missing Review Order setting |

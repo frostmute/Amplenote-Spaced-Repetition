@@ -20,7 +20,7 @@ Evaluate each documentation gap from the discovery phase and assign importance a
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps (or skip if empty)**: Read `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `LOOP_00001_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps with HIGH/CRITICAL importance and EASY/MEDIUM effort as PENDING for auto-fix. Output to `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_PLAN.md`.
+- [x] **Evaluate gaps (or skip if empty)**: Read `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `LOOP_00001_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps with HIGH/CRITICAL importance and EASY/MEDIUM effort as PENDING for auto-fix. Output to `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/LOOP_00001_PLAN.md`.
 
 ## Rating Criteria
 
