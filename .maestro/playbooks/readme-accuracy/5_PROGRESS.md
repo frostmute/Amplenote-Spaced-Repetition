@@ -20,16 +20,13 @@ This document is the **accuracy gate** for the usage documentation pipeline. It 
 
 ## Accuracy Gate Check
 
-- [x] **Check for remaining gaps**: Read LOOP_00001_PLAN.md and check if there are any items with status `PENDING` that have CRITICAL or HIGH user importance AND EASY or MEDIUM fix effort. If such items exist, reset documents 1-4 to continue the loop. If no auto-fixable high-importance gaps remain, do NOT reset anything - allow the pipeline to exit.
+- [x] **Check for remaining gaps**: Read LOOP_00001_PLAN.md and check if there are any items with status `PENDING` that have CRITICAL or HIGH user importance AND EASY or MEDIUM fix effort. If such items exist, reset documents 1-4 to continue the loop. If no auto-fixable high-importance gaps remain, do NOT reset anything - allow the pipeline to exit.\n    - Since DOC-002 is still PENDING with HIGH importance and EASY fix effort, I need to reset documents 1-4 to continue the loop.
 
 ## Reset Tasks (Only if PENDING high-importance gaps exist)
 
 If the accuracy gate check above determines we need to continue, reset all tasks in the following documents:
 
-- [x] **Reset 1_ANALYZE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/1_ANALYZE.md` 
-- [x] **Reset 2_FIND_GAPS.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/2_FIND_GAPS.md` 
-- [x] **Reset 3_EVALUATE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/3_EVALUATE.md` 
-- [x] **Reset 4_IMPLEMENT.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/4_IMPLEMENT.md`
+- [x] **Reset 1_ANALYZE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/1_ANALYZE.md` \n- [x] **Reset 2_FIND_GAPS.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/2_FIND_GAPS.md` \n- [x] **Reset 3_EVALUATE.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/3_EVALUATE.md` \n- [x] **Reset 4_IMPLEMENT.md**: Uncheck all tasks in `/Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition/.maestro/playbooks/readme-accuracy/4_IMPLEMENT.md`
 
 **IMPORTANT**: Only reset documents 1-4 if there are PENDING items with CRITICAL/HIGH importance and EASY/MEDIUM effort. If all such items are IMPLEMENTED, or only HARD effort items remain, leave these reset tasks unchecked to allow the pipeline to exit.
 
