@@ -21,9 +21,9 @@ A completely standalone implementation of the state-of-the-art **[FSRS-5 (Free S
 - **📝 Native Markdown Tables:** Define flashcards seamlessly by simply creating a table with `Question` and `Answer` headers anywhere in your notes.
 - **👻 Invisible State Tracking:** Keeps your notes visually clean. It encodes and stores flashcard intervals inside a hidden column, so your data remains unobtrusive while you edit text.
 - **🛡️ Bulletproof Parsing:** Amplenote's rich-text editor can occasionally shift columns or introduce empty cells. Our custom parser detects shifted columns and auto-corrects corrupted rows on the fly.
-- **🎨 Premium UI & Fallback:** 
-  - *Paid Users:* If you are an paying for Amplenote monthly you have access to the Peek Viewer sidebar feature within Amplenote and will experience a smooth, animated, 3D-flipping flashcard interface injected directly into Peek View.
-  - *Free Tier Users:* Run review sessions gracefully via native Amplenote Prompt/Alert dialogs directly within the note pane.
+- **🎨 Premium UI & Fallback:**
+  - _Paid Users:_ If you are an paying for Amplenote monthly you have access to the Peek Viewer sidebar feature within Amplenote and will experience a smooth, animated, 3D-flipping flashcard interface injected directly into Peek View.
+  - _Free Tier Users:_ Run review sessions gracefully via native Amplenote Prompt/Alert dialogs directly within the note pane.
 - **📊 Auto-Generating Dashboard:** Automatically creates and maintains an `srs-dashboard` note tracking your lifetime review statistics, retention rates, and session history!
 
 <br>
@@ -33,26 +33,32 @@ A completely standalone implementation of the state-of-the-art **[FSRS-5 (Free S
 If you are new to Spaced Repetition, here is a quick crash course on how this plugin actually makes you learn faster.
 
 ### The Forgetting Curve
-When you learn a new fact, your brain naturally starts forgetting it almost immediately. This is known as the "Forgetting Curve". To commit something to long-term memory, you shouldn't review it every single day. Instead, you should review it *just before you are about to forget it*. 
+
+When you learn a new fact, your brain naturally starts forgetting it almost immediately. This is known as the "Forgetting Curve". To commit something to long-term memory, you shouldn't review it every single day. Instead, you should review it _just before you are about to forget it_.
 
 Every time you successfully recall a fact at the edge of forgetting, your memory of it grows stronger, and the time it takes to forget it again gets longer.
 
 ### FSRS-5 (Free Spaced Repetition Scheduler)
+
 FSRS is a state-of-the-art mathematical algorithm that predicts your exact forgetting curve. When you review a flashcard in this plugin, you are asked to grade your memory on a scale of 1 to 4:
+
 1. **🔴 Again (Forgot):** You completely forgot the answer. The plugin resets the card's interval to 0 days, forcing you to relearn it immediately.
 2. **🟠 Hard:** You remembered it, but it took severe mental effort. The algorithm slightly increases the interval (e.g., from 3 days to 4 days) but flags the card as "difficult" to remember.
 3. **🟢 Good:** You remembered it with normal effort. The algorithm significantly increases the interval (e.g., from 3 days to 8 days).
 4. **🟣 Easy:** The answer was instantly obvious. The algorithm rapidly pushes the next review date far into the future (e.g., from 3 days to 14 days) so you don't waste time studying things you already know.
 
 ### Under the Hood
+
 To calculate exactly how many days to wait before showing you a card again, the plugin's FSRS algorithm tracks three hidden variables for every single flashcard you create:
-* **Stability ($S$):** How well you retain the memory. High stability means it takes months to forget.
-* **Difficulty ($D$):** How inherently hard the concept is for your brain to grasp. 
-* **Retrievability ($R$):** The probability (from 0% to 100%) that you can recall the card *right now*.
+
+- **Stability ($S$):** How well you retain the memory. High stability means it takes months to forget.
+- **Difficulty ($D$):** How inherently hard the concept is for your brain to grasp.
+- **Retrievability ($R$):** The probability (from 0% to 100%) that you can recall the card _right now_.
 
 By measuring how long it takes you to answer a card (the **timer** running in the background while the flashcard UI is open) and combining it with your 1-4 rating, the FSRS math calculates your unique $S$, $D$, and $R$ for that specific fact, outputting the optimal `nextReview` date.
 
 ### Why is there a Daily Limit?
+
 Spaced repetition is a marathon, not a sprint. If you have 500 flashcards due for review, trying to cram them all in one day leads to severe mental fatigue and artificially lowers your retention rates. The plugin allows you to set a `Daily Review Limit` (in Amplenote's plugin settings) to arbitrarily cap your daily sessions to a manageable chunk (e.g., 50 cards a day), ensuring your studying remains a healthy daily habit rather than an exhausting chore.
 
 <br>
@@ -61,15 +67,15 @@ Spaced repetition is a marathon, not a sprint. If you have 500 flashcards due fo
 
 ### Manual Install
 
-Because this plugin is pure JavaScript, there is no build step required. 
+Because this plugin is pure JavaScript, there is no build step required.
 
 1. Create a new note in Amplenote and assign it the `plugins` tag.
 2. At the top of the note, create a markdown table with **empty headers** to serve as the plugin metadata:
    ```markdown
-   | | |
-   |-|-|
-   | name | Spaced Repetition |
-   | icon | 🧠 |
+   |             |                                                           |
+   | ----------- | --------------------------------------------------------- |
+   | name        | Spaced Repetition                                         |
+   | icon        | 🧠                                                        |
    | description | Full FSRS-5 Flashcards right in your Amplenote workspace. |
    ```
 3. Below the table, create a Javascript code block (` ```javascript `) and paste the complete contents of [`plugin.js`](plugin.js) from this repository.
@@ -80,27 +86,39 @@ Because this plugin is pure JavaScript, there is no build step required.
 ## 📖 Usage Guide
 
 ### 1. Creating Flashcards
-Creating a flashcard is as simple as creating a table with **Question** and **Answer** headers. You can put as many tables in a note as you want.
 
-| Question | Answer |
-| --- | --- |
-| What does DOM stand for? | Document Object Model |
-| How do you initialize a list in Python? | `my_list = []` |
+Creating a flashcard is simple. You can use two different formats anywhere in your notes:
+
+**Format 1: Tables (Standard)**
+Create a table with **Question** and **Answer** headers. You can put as many tables in a note as you want.
+
+| Question                                | Answer                |
+| --------------------------------------- | --------------------- |
+| What does DOM stand for?                | Document Object Model |
+| How do you initialize a list in Python? | `my_list = []`        |
+
+**Format 2: Quote Blocks (Visually Distinct)**
+Use Markdown quote blocks to create flashcards that stand out visually. Use `> **Q:**` for the question and `> **A:**` for the answer.
+
+> **Q:** What does DOM stand for?
+> **A:** Document Object Model
 
 > [!WARNING] Amplenote Escaping Quirk
 > If your flashcard contains Markdown brackets like `[ ]` or `[[link]]`, **you must wrap them in backticks** like `` `[ ]` ``. If you don't use backticks, Amplenote's internal editor will try to aggressively escape them by inserting a backslash `\[` every time you run a review session.
 
-Add a tag to the note containing your flashcards (e.g., `#learning/javascript`).
+Add a tag to the note containing your flashcards (e.g., `#learning/javascript`). The plugin will automatically append the `#srs/due` tag to notes that have flashcards due for review.
 
 ### 2. Reviewing Flashcards
+
 1. Open the **Command Palette** (`Cmd+O` / `Ctrl+O`) or click the `...` menu in the top right of any note.
 2. Select **Start Review Session**.
 3. The plugin will prompt you for the tags you wish to review. Type the tag you used (e.g., `learning/javascript`).
 4. The review session will begin!
 
-*As you review, the plugin will automatically append a hidden third column to your tables to track intervals and easiness factors. Do not delete this column!*
+_As you review, the plugin will automatically append a hidden third column to your tables to track intervals and easiness factors. Do not delete this column!_
 
-### 3. Setup & Configuration\n\nIn the plugin settings, you can configure several options to customize your spaced repetition experience.\n\n#### Default Tags\n\nIf configured, starting a review session with a blank tag prompt will automatically use these default tags, saving you time from manually typing them out unless you want to override the defaults for a specific session.\n\n* **Review Order** (Optional): Set to "Due Date (Oldest First)" by default. Change to "Random" to shuffle flashcards during review.\n\n### 4. Your Stats Dashboard
+### 3. Setup & Configuration\n\nIn the plugin settings, you can configure several options to customize your spaced repetition experience.\n\n#### Default Tags\n\nIf configured, starting a review session with a blank tag prompt will automatically use these default tags, saving you time from manually typing them out unless you want to override the defaults for a specific session.\n\n\* **Review Order** (Optional): Set to "Due Date (Oldest First)" by default. Change to "Random" to shuffle flashcards during review.\n\n### 4. Your Stats Dashboard
+
 After completing your first review session, the plugin will automatically generate a new note titled **Spaced Repetition Dashboard** and tag it `#srs-dashboard`.
 
 This note tracks your lifetime statistics, calculating how many cards you've reviewed and showing a breakdown of your performance. It updates automatically at the end of every single review session.
@@ -109,7 +127,7 @@ This note tracks your lifetime statistics, calculating how many cards you've rev
 
 ## 🛠️ Development & Testing
 
-This project uses a custom-built, zero-dependency Markdown GFM Table parser to handle Amplenote's specific rich-text edge cases. 
+This project uses a custom-built, zero-dependency Markdown GFM Table parser to handle Amplenote's specific rich-text edge cases.
 
 To run the unit tests locally:
 
@@ -120,7 +138,7 @@ npm install
 npm test
 ```
 
-*Note: You do not need to run a build or compilation step to use the plugin. Modifications to `plugin.js` can be pasted directly into Amplenote.*
+_Note: You do not need to run a build or compilation step to use the plugin. Modifications to `plugin.js` can be pasted directly into Amplenote._
 
 <br>
 
@@ -129,7 +147,9 @@ npm test
 Contributions, issues, and feature requests are welcome!
 
 ### Reporting Bugs
+
 If you find a bug or something isn't working right:
+
 1. Check the [Issues](https://github.com/frostmute/Amplenote-Spaced-Repetition/issues) tab to see if it has already been reported.
 2. If not, open a new Issue. Please include:
    - Your device and OS (Mac, Windows, iOS, Android).
@@ -138,12 +158,16 @@ If you find a bug or something isn't working right:
    - A copy of the Markdown table that caused the issue (if applicable).
 
 ### Requesting Features
+
 Have an idea to make the plugin better?
+
 1. Open an Issue and tag it with `enhancement`.
 2. Describe the feature, why it would be useful, and how you imagine it working within Amplenote's constraints.
 
 ### Submitting Pull Requests
+
 If you want to contribute code:
+
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix (`git checkout -b feature/amazing-feature`).
 3. Make your changes to `plugin.js`. **Do not add external dependencies.** This plugin must remain a single vanilla JS file to stay under Amplenote's ~260KB limit.

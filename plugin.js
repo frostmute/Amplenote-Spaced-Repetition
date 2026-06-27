@@ -33,7 +33,63 @@
     const flashcards = [];
     if (!content || typeof content !== 'string') return { flashcards, lines: [] };
     const lines = content.split('\n');
+    
+    // Process markdown highlighting/quoting styles
+    for (let i = 0; i < lines.length; i++) {
+      // Find `> **Q:** Question\n> **A:** Answer` blocks
+      if (lines[i].startsWith('> **Q:**')) {
+        let question = lines[i].replace('> **Q:**', '').trim();
+        let answer = '';
+        let j = i + 1;
+        
+        while (j < lines.length && lines[j].startsWith('>')) {
+          if (lines[j].startsWith('> **A:**')) {
+             answer = lines[j].replace('> **A:**', '').trim();
+          } else if (answer) {
+             answer += '\n' + lines[j].replace('>', '').trim();
+          } else {
+             question += '\n' + lines[j].replace('>', '').trim();
+          }
+          j++;
+        }
+        
+        if (answer) {
+          // Look for SRS data (hidden or explicit) at the end of answer or as next line
+          let srsDataStr = null;
+          let srsLineIdx = -1;
+          
+          if (lines[j] && lines[j].includes('<!--')) {
+             const m = lines[j].match(/<!--(ey[a-zA-Z0-9+/=]+)-->/);
+             if (m) {
+               srsDataStr = m[1];
+               srsLineIdx = j;
+             }
+          }
+          
+          let parsedSrs = null;
+          if (srsDataStr) {
+            try {
+               const decoded = atob(srsDataStr);
+               parsedSrs = JSON.parse(decoded);
+            } catch (e) {
+               console.error('Failed to parse quote card SRS data:', e);
+            }
+          }
+          
+          flashcards.push({
+            question,
+            answer,
+            format: 'quote',
+            startLine: i,
+            endLine: j, // or srsLineIdx if found
+            srsLineIdx,
+            ...(parsedSrs || {})
+          });
+        }
+      }
+    }
 
+    // Process tables
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim().startsWith('|')) continue;
@@ -332,6 +388,29 @@
     return escaped;
   },
 
+  _findColIdx: function (lines, options) {
+    for (let j = 0; j < lines.length; j++) {
+      if (lines[j].match(/\|(\s*-+\s*\|)+/)) {
+        let headerLineIdx = j - 1;
+        if (headerLineIdx >= 0) {
+          const headers = this._parseCells(lines[headerLineIdx]).map((h) => h.toLowerCase());
+          const idx = headers.findIndex((h) => options.some(opt => h.includes(opt)));
+          if (idx !== -1) return idx;
+        }
+      }
+    }
+    return -1;
+  },
+
+  _findHeaderRow: function (lines, qIdx) {
+    for (let j = 0; j < lines.length; j++) {
+      if (lines[j].match(/\|(\s*-+\s*\|)+/)) {
+        return j - 1;
+      }
+    }
+    return 0;
+  },
+
   _createScheduler: function () {
     const w = [
       0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0589, 1.533, 0.1544, 1.0071,
@@ -433,9 +512,9 @@
 
   _collectDueCards: async function (app, tags) {
     try {
-      // app.filterNotes expects a string for the 'tag' property in some versions,
+      // Amplenote prompt 'tags' returns either a comma separated string (e.g., \"tag1, tag2\")
       // or sometimes an array. If 'tags' is an array, we should extract the first element
-      // or pass it directly. Amplenote's API: `app.filterNotes({ tag: "my-tag" })`
+      // or pass it directly. Amplenote's API: `app.filterNotes({ tag: \"my-tag\" })`
       const tagQuery = Array.isArray(tags) ? tags[0] : tags;
       const noteHandles = await app.filterNotes({ tag: tagQuery });
       if (noteHandles.length === 0) {
@@ -444,6 +523,8 @@
       }
 
       let allFlashcards = [];
+      const notesWithDueCards = new Set();
+      
       for (const noteHandle of noteHandles) {
         try {
           const note = await app.notes.find(noteHandle.uuid);
@@ -451,9 +532,44 @@
             const content = await note.content();
             if (content) {
               const { flashcards } = this._extractFlashcardsFromMarkdown(content);
+              
+              const now = new Date();
+              let hasDueCards = false;
+              
               flashcards.forEach((card) => {
                 card.noteUUID = note.uuid;
+                const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
+                if (isNaN(nextReview.getTime()) || nextReview <= now) {
+                   hasDueCards = true;
+                }
               });
+              
+              if (hasDueCards) {
+                 notesWithDueCards.add(note.uuid);
+              }
+              
+              allFlashcards = allFlashcards.concat(flashcards);
+            }
+          }
+        } catch (noteError) {
+          console.error(noteError);
+        }
+      }
+
+      // Add #srs/due tags for notes with due cards
+      for (const uuid of notesWithDueCards) {
+         try {
+             await app.addNoteTag({ uuid }, 'srs/due');
+         } catch(e) {
+             console.error('Failed to add #srs/due tag', e);
+         }
+      }
+
+      const now = new Date();
+      let dueCards = allFlashcards.filter((card) => {
+        const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
+        return isNaN(nextReview.getTime()) ? true : nextReview <= now;
+      });
               allFlashcards = allFlashcards.concat(flashcards);
             }
           }
@@ -526,7 +642,11 @@
       index: 0,
       ratingsCount: { 1: 0, 2: 0, 3: 0, 4: 0 },
     };
-
+    
+    // We can also remove #srs/due when a session completes, but actually a better time
+    // is when the user finishes reviewing the card. But a batch removal after session is simpler.
+    // We will do it in _updateDashboard
+    
     // Check context for mobile flag. If mobile, skip embed and go straight to prompt.
     let isMobile = false;
     try {
@@ -1020,6 +1140,36 @@ ___
     } catch (e) {
       console.error('Failed to update dashboard', e);
     }
+
+    // Clean up #srs/due tags for notes that were fully reviewed in this session
+    // Find unique notes in session
+    const notesInSession = [...new Set(session.cards.map(c => c.noteUUID))];
+    for (const uuid of notesInSession) {
+      try {
+        const note = await app.notes.find(uuid);
+        if (note) {
+           const content = await note.content();
+           if (content) {
+             const { flashcards } = this._extractFlashcardsFromMarkdown(content);
+             const now = new Date();
+             let hasDueCards = false;
+             
+             flashcards.forEach((card) => {
+               const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
+               if (isNaN(nextReview.getTime()) || nextReview <= now) {
+                  hasDueCards = true;
+               }
+             });
+             
+             if (!hasDueCards && note.tags && note.tags.includes('srs/due')) {
+                await app.removeNoteTag({ uuid }, 'srs/due');
+             }
+           }
+        }
+      } catch (e) {
+         console.error('Failed to clear #srs/due tag', e);
+      }
+    }
   },
 
   _currentReviewSession: { cards: [], index: 0 },
@@ -1054,33 +1204,74 @@ ___
       (c) =>
         (c.question === card.question && c.answer === card.answer) || c.answer === card.question // fallback for corrupted rows where question landed in answer col
     );
+
     if (!freshCard) {
-      console.error('Failed to find card in note:', card.question);
-      return;
-    }
-    card.lineIndex = freshCard.lineIndex;
-
-    const targetLine = lines[card.lineIndex];
-    const updated = this._updateFlashcardInLines(lines, card);
-    if (!updated) {
-      console.error('Failed to update card line in note:', card.question);
+      console.error('Card not found in note during save:', card.question);
       return;
     }
 
-    // If the line didn't change (other than SRS_DATA), try to only replace that specific block of text to prevent backslash compounding
-    // across the entire document during replaceContent. But Amplenote API does not support line-by-line edit without UUIDs.
-    // However, the backslash compounding happens because Amplenote's Markdown parser double-escapes on replaceContent.
-    // Workaround: We only replace the exact text of the single row using replaceContent's `replace` parameter if it existed.
-    // But since replaceContent only takes (newContent), it replaces everything.
-    // Wait, `replaceContent` can take a second parameter! `note.replaceContent(newMarkdown, section)`!
-    // Since we don't have the section, we can use `note.replaceContent(newContent)` but we must unescape the compounding slashes before sending it back!
+    const srsData = {
+      easinessFactor: card.easinessFactor || card.stability,
+      nextReview: card.nextReview,
+      reps: card.reps,
+      lapses: card.lapses,
+      stability: card.stability,
+      difficulty: card.difficulty,
+      elapsed_days: card.elapsed_days,
+      scheduled_days: card.scheduled_days,
+      state: card.state,
+      last_review: card.last_review,
+    };
+    const encodedSrs = btoa(JSON.stringify(srsData));
+    let newContent = '';
 
-    // Unescape compounding backslashes that Amplenote generates on every read/write cycle
-    // Note: If you have \ in your markdown, it will get reduced to nothing on each save.
-    // This is necessary because Amplenote's API currently doubles backslashes inside tables on every full-note overwrite.
-    let newContent = this._linesToMarkdown(lines);
+    if (freshCard.format === 'quote') {
+      const srsMarker = `<!--${encodedSrs}-->`;
+      if (freshCard.srsLineIdx !== -1) {
+         lines[freshCard.srsLineIdx] = srsMarker;
+      } else {
+         lines.splice(freshCard.endLine, 0, srsMarker);
+      }
+      newContent = lines.join('\n');
+    } else {
+      // Table update logic
+      let updated = false;
+      for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].includes('|')) continue;
+        let cells = this._parseCells(lines[i]);
+        if (cells.length >= 2) {
+          const qIdx = this._findColIdx(lines, ['question', 'q', 'front']);
+          const aIdx = this._findColIdx(lines, ['answer', 'a', 'back']);
+          if (qIdx === -1 || aIdx === -1) continue;
+
+          let qText = cells[qIdx];
+          let aText = cells[aIdx];
+
+          if (qText === freshCard.question && aText === freshCard.answer) {
+            const headers = this._parseCells(lines[this._findHeaderRow(lines, qIdx)]);
+            let srsIdx = headers.findIndex(
+              (h) => h.includes('srs_data') || h.includes('<!--srs_data-->')
+            );
+            if (srsIdx === -1) srsIdx = headers.length; // Will append if header exists but no data col
+            cells[srsIdx] = `<!--${encodedSrs}-->`;
+            
+            // Format for table
+            lines[i] = '| ' + cells.join(' | ') + ' |';
+            updated = true;
+            break;
+          }
+        }
+      }
+
+      if (!updated) {
+        console.error('Failed to update card line in note:', card.question);
+        return;
+      }
+      newContent = this._linesToMarkdown(lines);
+    }
+    
     // Eliminate all compounding slashes indiscriminately so they don't corrupt the note visually
-    newContent = newContent.replace(/\\/g, '');
+    newContent = newContent.replace(/\\\\/g, '');
     await note.replaceContent(newContent);
   },
 });
