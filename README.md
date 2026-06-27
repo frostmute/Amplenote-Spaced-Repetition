@@ -100,7 +100,7 @@ Add a tag to the note containing your flashcards (e.g., `#learning/javascript`).
 
 *As you review, the plugin will automatically append a hidden third column to your tables to track intervals and easiness factors. Do not delete this column!*
 
-### 3. Setup & Configuration\n\nIn the plugin settings, you can configure several options to customize your spaced repetition experience. \n\n#### Default Tags\n\nIf configured, starting a review session with a blank tag prompt will automatically use these default tags, saving you time from manually typing them out unless you want to override the defaults for a specific session.\n\n### 4. Your Stats Dashboard
+### 3. Setup & Configuration\n\nIn the plugin settings, you can configure several options to customize your spaced repetition experience.\n\n#### Default Tags\n\nIf configured, starting a review session with a blank tag prompt will automatically use these default tags, saving you time from manually typing them out unless you want to override the defaults for a specific session.\n\n* **Review Order** (Optional): Set to "Due Date (Oldest First)" by default. Change to "Random" to shuffle flashcards during review.\n\n### 4. Your Stats Dashboard
 After completing your first review session, the plugin will automatically generate a new note titled **Spaced Repetition Dashboard** and tag it `#srs-dashboard`.
 
 This note tracks your lifetime statistics, calculating how many cards you've reviewed and showing a breakdown of your performance. It updates automatically at the end of every single review session.

@@ -1,6 +1,6 @@
 ---
 
-## [2026-06-26 19:03] - Added Default Tags configuration to README
+## [2026-06-26 12:00] - Documented Review Order Setting
 
 **Agent:** Amplenote SRS
 **Project:** /Users/thewytchhaus/Documents/GitHub/Amplenote-Spaced-Repetition
@@ -15,17 +15,11 @@ MISSING → Added
 Setup & Configuration
 
 ### What Was Changed
-Added a new "Setup & Configuration" section outlining the "Default Tags" setting available in the plugin settings.
+Added a bullet point describing the Review Order setting under Setup & Configuration.
 
 ### Content Added/Changed
 ```markdown
-### 3. Setup & Configuration
-
-In the plugin settings, you can configure several options to customize your spaced repetition experience. 
-
-#### Default Tags
-
-If configured, starting a review session with a blank tag prompt will automatically use these default tags, saving you time from manually typing them out unless you want to override the defaults for a specific session.
+* **Review Order** (Optional): Set to "Due Date (Oldest First)" by default. Change to "Random" to shuffle flashcards during review.
 ```
 
 ### Verification
@@ -33,4 +27,3 @@ If configured, starting a review session with a blank tag prompt will automatica
 - [x] Formatting matches existing README style
 - [x] No broken links or references introduced
 - [x] Content is accurate based on code review
-
