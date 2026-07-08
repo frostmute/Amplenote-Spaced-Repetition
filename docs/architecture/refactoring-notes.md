@@ -20,7 +20,7 @@ We introduced standard linting (`eslint`) and formatting (`prettier`) to the pro
 ## Monolithic Functions (`plugin.js`)
 
 - Some functions like `_extractFlashcardsFromMarkdown` and `_updateFlashcardInLines` were monolithic and managed parsing string lines, updating state, and tracking column positions.
-- *Notes for future work*: We need to extract out pure utility functions. The date mathematics block within `_createScheduler` works as a pseudo-factory, encapsulating the FSRS math variables. This could be extracted out to a pure function import, but due to the Amplenote single-file FSRS packaging requirement, it's safer right now to keep the code bundled within the `plugin.js` IIFE wrapper.
+- _Notes for future work_: We need to extract out pure utility functions. The date mathematics block within `_createScheduler` works as a pseudo-factory, encapsulating the FSRS math variables. This could be extracted out to a pure function import, but due to the Amplenote single-file FSRS packaging requirement, it's safer right now to keep the code bundled within the `plugin.js` IIFE wrapper.
 
 ## Data Structure and Loop Optimizations
 

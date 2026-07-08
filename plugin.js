@@ -33,7 +33,7 @@ module.exports = {
     const flashcards = [];
     if (!content || typeof content !== 'string') return { flashcards, lines: [] };
     const lines = content.split('\n');
-    
+
     // Process markdown highlighting/quoting styles
     for (let i = 0; i < lines.length; i++) {
       // Find `> **Q:** Question\n> **A:** Answer` blocks
@@ -41,41 +41,41 @@ module.exports = {
         let question = lines[i].replace('> **Q:**', '').trim();
         let answer = '';
         let j = i + 1;
-        
+
         while (j < lines.length && lines[j].startsWith('>')) {
           if (lines[j].startsWith('> **A:**')) {
-             answer = lines[j].replace('> **A:**', '').trim();
+            answer = lines[j].replace('> **A:**', '').trim();
           } else if (answer) {
-             answer += '\n' + lines[j].replace('>', '').trim();
+            answer += '\n' + lines[j].replace('>', '').trim();
           } else {
-             question += '\n' + lines[j].replace('>', '').trim();
+            question += '\n' + lines[j].replace('>', '').trim();
           }
           j++;
         }
-        
+
         if (answer) {
           // Look for SRS data (hidden or explicit) at the end of answer or as next line
           let srsDataStr = null;
           let srsLineIdx = -1;
-          
+
           if (lines[j] && lines[j].includes('<!--')) {
-             const m = lines[j].match(/<!--(ey[a-zA-Z0-9+/=]+)-->/);
-             if (m) {
-               srsDataStr = m[1];
-               srsLineIdx = j;
-             }
+            const m = lines[j].match(/<!--(ey[a-zA-Z0-9+/=]+)-->/);
+            if (m) {
+              srsDataStr = m[1];
+              srsLineIdx = j;
+            }
           }
-          
+
           let parsedSrs = null;
           if (srsDataStr) {
             try {
-               const decoded = atob(srsDataStr);
-               parsedSrs = JSON.parse(decoded);
+              const decoded = atob(srsDataStr);
+              parsedSrs = JSON.parse(decoded);
             } catch (e) {
-               console.error('Failed to parse quote card SRS data:', e);
+              console.error('Failed to parse quote card SRS data:', e);
             }
           }
-          
+
           flashcards.push({
             question,
             answer,
@@ -83,7 +83,7 @@ module.exports = {
             startLine: i,
             endLine: j, // or srsLineIdx if found
             srsLineIdx,
-            ...(parsedSrs || {})
+            ...(parsedSrs || {}),
           });
         }
       }
@@ -218,15 +218,15 @@ module.exports = {
                 // Try decoding the base64 string
                 const cleanSrs = srsField.replace(/<!--/g, '').replace(/-->/g, '').trim();
                 srsData = JSON.parse(atob(decodeURIComponent(cleanSrs)));
-              } catch (e1) {
+              } catch (_e1) {
                 try {
                   srsData = JSON.parse(
                     atob(srsField.replace(/<!--/g, '').replace(/-->/g, '').trim())
                   );
-                } catch (e2) {
+                } catch (_e2) {
                   try {
                     srsData = JSON.parse(srsField.replace(/<!--/g, '').replace(/-->/g, '').trim());
-                  } catch (e3) {}
+                  } catch (_e3) {}
                 }
               }
             }
@@ -394,7 +394,7 @@ module.exports = {
         let headerLineIdx = j - 1;
         if (headerLineIdx >= 0) {
           const headers = this._parseCells(lines[headerLineIdx]).map((h) => h.toLowerCase());
-          const idx = headers.findIndex((h) => options.some(opt => h.includes(opt)));
+          const idx = headers.findIndex((h) => options.some((opt) => h.includes(opt)));
           if (idx !== -1) return idx;
         }
       }
@@ -402,7 +402,7 @@ module.exports = {
     return -1;
   },
 
-  _findHeaderRow: function (lines, qIdx) {
+  _findHeaderRow: function (lines, _qIdx) {
     for (let j = 0; j < lines.length; j++) {
       if (lines[j].match(/\|(\s*-+\s*\|)+/)) {
         return j - 1;
@@ -524,7 +524,7 @@ module.exports = {
 
       let allFlashcards = [];
       const notesWithDueCards = new Set();
-      
+
       for (const noteHandle of noteHandles) {
         try {
           const note = await app.notes.find(noteHandle.uuid);
@@ -532,22 +532,22 @@ module.exports = {
             const content = await note.content();
             if (content) {
               const { flashcards } = this._extractFlashcardsFromMarkdown(content);
-              
+
               const now = new Date();
               let hasDueCards = false;
-              
+
               flashcards.forEach((card) => {
                 card.noteUUID = note.uuid;
                 const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
                 if (isNaN(nextReview.getTime()) || nextReview <= now) {
-                   hasDueCards = true;
+                  hasDueCards = true;
                 }
               });
-              
+
               if (hasDueCards) {
-                 notesWithDueCards.add(note.uuid);
+                notesWithDueCards.add(note.uuid);
               }
-              
+
               allFlashcards = allFlashcards.concat(flashcards);
             }
           }
@@ -558,11 +558,11 @@ module.exports = {
 
       // Add #srs/due tags for notes with due cards
       for (const uuid of notesWithDueCards) {
-         try {
-             await app.addNoteTag({ uuid }, 'srs/due');
-         } catch(e) {
-             console.error('Failed to add #srs/due tag', e);
-         }
+        try {
+          await app.addNoteTag({ uuid }, 'srs/due');
+        } catch (e) {
+          console.error('Failed to add #srs/due tag', e);
+        }
       }
 
       const now = new Date();
@@ -629,11 +629,11 @@ module.exports = {
       index: 0,
       ratingsCount: { 1: 0, 2: 0, 3: 0, 4: 0 },
     };
-    
+
     // We can also remove #srs/due when a session completes, but actually a better time
     // is when the user finishes reviewing the card. But a batch removal after session is simpler.
     // We will do it in _updateDashboard
-    
+
     // Check context for mobile flag. If mobile, skip embed and go straight to prompt.
     let isMobile = false;
     try {
@@ -720,7 +720,7 @@ module.exports = {
   },
 
   noteOption: {
-    'Start Review Session': async function (app, noteUUID) {
+    'Start Review Session': async function (app, _noteUUID) {
       // Need to capture `this` context for noteOption hooks
       const self = this;
       try {
@@ -826,7 +826,7 @@ module.exports = {
             completeAvgEf = parsed.avgEf;
             break;
           }
-        } catch (e) {}
+        } catch (_e) {}
       }
     }
 
@@ -845,7 +845,7 @@ module.exports = {
 
     const session = this._currentReviewSession;
     const progress = session ? `${session.index + 1} / ${session.cards.length}` : '1 / 1';
-    const barPct = session ? Math.round((session.index / session.cards.length) * 100) : 0;
+    const _barPct = session ? Math.round((session.index / session.cards.length) * 100) : 0;
 
     if (isComplete || card._complete) {
       const stats = completeStats || card.stats || { 1: 0, 2: 0, 3: 0, 4: 0 };
@@ -1010,7 +1010,7 @@ document.getElementById('mainWrap').focus();
       if (typeof rawData === 'string') {
         try {
           data = JSON.parse(rawData);
-        } catch (e) {}
+        } catch (_e) {}
       } else if (typeof rawData === 'object' && rawData !== null) {
         data = rawData;
       }
@@ -1020,7 +1020,7 @@ document.getElementById('mainWrap').focus();
         const parsed = JSON.parse(args[0]);
         action = parsed.action || '';
         data = parsed;
-      } catch (e) {}
+      } catch (_e) {}
     } else if (args.length === 1 && typeof args[0] === 'object') {
       action = args[0].action || '';
       data = args[0];
@@ -1083,7 +1083,7 @@ document.getElementById('mainWrap').focus();
       if (statsMatch) {
         try {
           stats = JSON.parse(statsMatch[1]);
-        } catch (e) {}
+        } catch (_e) {}
       }
 
       // Merge the new session stats directly
@@ -1130,31 +1130,31 @@ ___
 
     // Clean up #srs/due tags for notes that were fully reviewed in this session
     // Find unique notes in session
-    const notesInSession = [...new Set(session.cards.map(c => c.noteUUID))];
+    const notesInSession = [...new Set(session.cards.map((c) => c.noteUUID))];
     for (const uuid of notesInSession) {
       try {
         const note = await app.notes.find(uuid);
         if (note) {
-           const content = await note.content();
-           if (content) {
-             const { flashcards } = this._extractFlashcardsFromMarkdown(content);
-             const now = new Date();
-             let hasDueCards = false;
-             
-             flashcards.forEach((card) => {
-               const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
-               if (isNaN(nextReview.getTime()) || nextReview <= now) {
-                  hasDueCards = true;
-               }
-             });
-             
-             if (!hasDueCards && note.tags && note.tags.includes('srs/due')) {
-                await app.removeNoteTag({ uuid }, 'srs/due');
-             }
-           }
+          const content = await note.content();
+          if (content) {
+            const { flashcards } = this._extractFlashcardsFromMarkdown(content);
+            const now = new Date();
+            let hasDueCards = false;
+
+            flashcards.forEach((card) => {
+              const nextReview = card.nextReview ? new Date(card.nextReview) : new Date(0);
+              if (isNaN(nextReview.getTime()) || nextReview <= now) {
+                hasDueCards = true;
+              }
+            });
+
+            if (!hasDueCards && note.tags && note.tags.includes('srs/due')) {
+              await app.removeNoteTag({ uuid }, 'srs/due');
+            }
+          }
         }
       } catch (e) {
-         console.error('Failed to clear #srs/due tag', e);
+        console.error('Failed to clear #srs/due tag', e);
       }
     }
   },
@@ -1215,9 +1215,9 @@ ___
     if (freshCard.format === 'quote') {
       const srsMarker = `<!--${encodedSrs}-->`;
       if (freshCard.srsLineIdx !== -1) {
-         lines[freshCard.srsLineIdx] = srsMarker;
+        lines[freshCard.srsLineIdx] = srsMarker;
       } else {
-         lines.splice(freshCard.endLine, 0, srsMarker);
+        lines.splice(freshCard.endLine, 0, srsMarker);
       }
       newContent = lines.join('\n');
     } else {
@@ -1241,7 +1241,7 @@ ___
             );
             if (srsIdx === -1) srsIdx = headers.length; // Will append if header exists but no data col
             cells[srsIdx] = `<!--${encodedSrs}-->`;
-            
+
             // Format for table
             lines[i] = '| ' + cells.join(' | ') + ' |';
             updated = true;
@@ -1256,7 +1256,7 @@ ___
       }
       newContent = this._linesToMarkdown(lines);
     }
-    
+
     // Eliminate all compounding slashes indiscriminately so they don't corrupt the note visually
     newContent = newContent.replace(/\\\\\\\\/g, '');
     await note.replaceContent(newContent);

@@ -18,7 +18,7 @@ The Amplenote Spaced Repetition plugin is a local-first, zero-dependency impleme
 A core design requirement was "Invisible State Tracking." The plugin avoids creating separate database files or requiring external APIs. Instead, it persists state directly within the user's notes:
 
 1.  **Flashcard Data:** Flashcards are defined using standard Markdown tables (with `Question` and `Answer` headers) or distinct Quote blocks (`> **Q:**` / `> **A:**`).
-2.  **Scheduling State:** When a user reviews a flashcard, the FSRS algorithm calculates the new scheduling state (Stability, Difficulty, Retrievability, and Next Review Date). This state is encoded and stored in a *hidden column* added to the Markdown table (or hidden metadata in the quote block). This ensures the data remains unobtrusive while the user edits the note text.
+2.  **Scheduling State:** When a user reviews a flashcard, the FSRS algorithm calculates the new scheduling state (Stability, Difficulty, Retrievability, and Next Review Date). This state is encoded and stored in a _hidden column_ added to the Markdown table (or hidden metadata in the quote block). This ensures the data remains unobtrusive while the user edits the note text.
 3.  **Note Tagging:** The plugin automatically manages the `#srs/due` tag. It appends this tag to notes that contain flashcards currently due for review, making it easy for the user to find their daily study material.
 4.  **Statistics:** A dedicated `#srs-dashboard` note is automatically generated and updated after each review session to persist lifetime statistics and review history.
 
