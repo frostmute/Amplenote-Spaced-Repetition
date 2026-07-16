@@ -1,4 +1,3 @@
-// fs and path were used for file saving during dev, ignore now if not needed
 const plugin = require('../plugin');
 
 describe('Markdown Parser', () => {
