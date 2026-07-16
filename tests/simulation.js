@@ -66,7 +66,7 @@ const app = {
     if (uuid === 'dash-123') mockDashboardNote = newContent;
     else mockFlashcardNote = newContent;
   },
-  createNote: async (title, tags) => {
+  createNote: async (title, _tags) => {
     mockDashboardNote = `# ${title}`;
     return 'dash-123';
   },
@@ -92,7 +92,7 @@ const app = {
     }
   },
   alert: async (msg) => console.log(`[Mock App ALERT]: ${msg}`),
-  prompt: async (msg, opts) => {
+  prompt: async (_msg, _opts) => {
     return ['test-tag'];
   },
 };

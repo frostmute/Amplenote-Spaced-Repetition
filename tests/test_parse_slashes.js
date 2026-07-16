@@ -40,7 +40,7 @@ const _extractFlashcardsFromMarkdown = function (content) {
     const headers = _parseCells(line).map((h) => h.toLowerCase().trim());
     const qIdx = headers.indexOf('question');
     const aIdx = headers.indexOf('answer');
-    const srsIdx = headers.indexOf('srs_data');
+    const _srsIdx = headers.indexOf('srs_data');
     if (qIdx === -1 || aIdx === -1) continue;
 
     i++; // move past header

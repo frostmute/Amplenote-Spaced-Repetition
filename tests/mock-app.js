@@ -1,1 +1,16 @@
-class MockApp { constructor() { this.settings = {}; } async filterNotes() { return []; } async getNoteContent() { return ''; } async replaceNoteContent() {} async addNoteTag() {} async prompt() {} async alert() {} } module.exports = MockApp;
+class MockApp {
+  constructor() {
+    this.settings = {};
+  }
+  async filterNotes() {
+    return [];
+  }
+  async getNoteContent() {
+    return '';
+  }
+  async replaceNoteContent() {}
+  async addNoteTag() {}
+  async prompt() {}
+  async alert() {}
+}
+module.exports = MockApp;

@@ -1,1 +1,6 @@
-module.exports = { testEnvironment: 'node', rootDir: '../', collectCoverage: true, collectCoverageFrom: ['plugin.js'] };
+module.exports = {
+  testEnvironment: 'node',
+  rootDir: '../',
+  collectCoverage: true,
+  collectCoverageFrom: ['plugin.js'],
+};
