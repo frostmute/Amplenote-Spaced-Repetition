@@ -1,4 +1,3 @@
-// fs and path were used for file saving during dev, ignore now if not needed
 const MockApp = require('./mock-app');
 const plugin = require('../plugin');
 
