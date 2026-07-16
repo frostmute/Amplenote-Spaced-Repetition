@@ -845,7 +845,7 @@ module.exports = {
 
     const session = this._currentReviewSession;
     const progress = session ? `${session.index + 1} / ${session.cards.length}` : '1 / 1';
-    const _barPct = session ? Math.round((session.index / session.cards.length) * 100) : 0;
+    const barPct = session ? Math.round((session.index / session.cards.length) * 100) : 0;
 
     if (isComplete || card._complete) {
       const stats = completeStats || card.stats || { 1: 0, 2: 0, 3: 0, 4: 0 };
